@@ -1,0 +1,17 @@
+{
+    "require": {
+        "symfony/dom-crawler": "~3.0@dev",
+        "symfony/css-selector": "~3.0@dev"
+    },
+    "require-dev": {
+      "phpunit/phpunit": "4.3.*"
+    },
+    "autoload": {
+        "psr-0": { "Fipe\\": "src/" }
+    },
+    "scripts": {
+      "test": "./vendor/phpunit/phpunit/phpunit src/"
+    },
+    "minimum-stability": "dev",
+    "target-dir": ""
+}
