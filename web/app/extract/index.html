@@ -1,0 +1,120 @@
+<div class="well">
+    <div class="container">
+        <h1>Extrair Tabelas</h1>
+
+        <form class="vertical" role="form" name="form">
+
+            <div class="row">
+                <div class="form-group col-lg-2 col-md-3 col-sm-3 col-xs-12">
+                    <label class="control-label">Tipo de Veículo</label>
+                    <select name="tipo" ng-model="data.tipo" class="form-control" ng-required="true" ng-disabled="extracting"
+                            ng-options="obj.id as obj.lbl for obj in options.tipos">
+                    </select>
+                </div>
+                <div class="form-group col-lg-4 col-md-5 col-sm-5 col-xs-12"
+                     ng-class="{true: 'has-error', false: ''} [form.tabela.$error.required]">
+                    <label class="control-label">
+                        Tabela/Período
+                        <span ng-show="form.tabela.$error.required" class="help-inline error"> obrigatória</span>
+                    </label>
+                    <p class="form-control-static" ng-show="options.tabelas.length === 0">
+                        <i class="fa fa-spin fa-spinner"></i> carregando tabelas...
+                    </p>
+                    <select name="tabela" ng-model="data.tabela" class="form-control" ng-show="options.tabelas.length > 0"
+                            data-placeholder="Selecione Tabela" ng-required="true" ng-disabled="extracting"
+                            ng-options="obj.id as obj.lbl for obj in options.tabelas">
+                    </select>
+                </div>
+                <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                    <label class="control-label">&nbsp;</label>
+
+                    <button class="btn btn-primary btn-block" ng-show="options.tabelas.length > 0 && !extracting"
+                            ng-disabled="form.tabela.$error.required"
+                            ng-class="{true: 'btn-danger', false: ''} [form.tabela.$error.required]"
+                            ng-click="doExtractMarcas()"
+                            >
+                        <i class="fa fa-play"></i>
+                        Extrair!
+                    </button>
+
+                    <button class="btn btn-warning btn-block" ng-show="extracting" ng-click="cancelExtract()">
+                        <i class="fa fa-stop"></i>
+                        Cancelar!
+                    </button>
+
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+<div class="container" ng-show="true">
+    <div class="row">
+
+        <div ng-class="{ true: 'col-xs-4', false: 'col-xs-12'} [data.tipo === 999]"
+             ng-show="data.tipo === 999 || data.tipo === 1">
+            <button class="btn btn-default btn-lg btn-block">
+                <i class="fa fa-car"></i> Carros
+                <small ng-show="extracting"> Modelos: {{ totals.carro.modelos }} / Veiculos: {{ totals.carro.veiculos }}</small>
+            </button>
+            <ul class="marcas list-group">
+                <li class="list-group-item"ng-repeat="marca in results.carro">
+                    <h5>
+                        {{ marca.id }} - {{ marca.lbl }}
+                        <i class="fa fa-check" ng-show="marca.status == 'ok'"></i>
+                        <i class="fa fa-spin fa-circle-o-notch" ng-show="marca.status == 'run'"></i>
+                        <i class="fa fa-warning" ng-show="marca.status == 'cancel'"></i>
+                        <br/>
+                        <small>Total Modelos: {{ marca.modelos.length }}</small>
+                    </h5>
+                </li>
+            </ul>
+        </div>
+
+
+        <div ng-class="{ true: 'col-xs-4', false: 'col-xs-12'} [data.tipo === 999]"
+             ng-show="data.tipo === 999 || data.tipo === 2">
+            <button class="btn btn-default btn-lg btn-block">
+                <i class="fa fa-motorcycle"></i> Motos
+                <small ng-show="extracting"> Modelos: {{ totals.moto.modelos }} / Veiculos: {{ totals.moto.veiculos }}</small>
+            </button>
+            <ul class="marcas list-group">
+                <li class="list-group-item"ng-repeat="marca in results.moto">
+                    <h5>
+                        {{ marca.id }} - {{ marca.lbl }}
+                        <i class="fa fa-check" ng-show="marca.status == 'ok'"></i>
+                        <i class="fa fa-spin fa-circle-o-notch" ng-show="marca.status == 'run'"></i>
+                        <i class="fa fa-warning" ng-show="marca.status == 'cancel'"></i>
+                        <br/>
+                        <small>Total Modelos: {{ marca.modelos.length }}</small>
+                    </h5>
+                </li>
+            </ul>
+        </div>
+
+
+        <div ng-class="{ true: 'col-xs-4', false: 'col-xs-12'} [data.tipo === 999]"
+             ng-show="data.tipo === 999 || data.tipo === 3">
+            <button class="btn btn-default btn-lg btn-block">
+                <i class="fa fa-truck"></i> Caminhão
+                <small ng-show="extracting"> Modelos: {{ totals.caminhao.modelos }} / Veiculos: {{ totals.caminhao.veiculos }}</small>
+            </button>
+            <ul class="marcas list-group">
+                <li class="list-group-item"ng-repeat="marca in results.caminhao">
+                    <h5>
+                        {{ marca.id }} - {{ marca.lbl }}
+                        <i class="fa fa-check" ng-show="marca.status == 'ok'"></i>
+                        <i class="fa fa-spin fa-circle-o-notch" ng-show="marca.status == 'run'"></i>
+                        <i class="fa fa-warning" ng-show="marca.status == 'cancel'"></i>
+                        <br/>
+                        <small>Total Modelos: {{ marca.modelos.length }}</small>
+                    </h5>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>

@@ -3,6 +3,7 @@
 namespace Fipe;
 
 use Symfony\Component\DomCrawler\Crawler as DomCrawler;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 class Crawler {
 
@@ -20,6 +21,44 @@ class Crawler {
         3 => 'caminhao'
     );
 
+    static $tipoVeiculosFull = array(
+        1 => 'Carro',
+        2 => 'Moto',
+        3 => 'Caminhão',
+        999 => 'Todos',
+    );
+
+    static $meses = array(
+        'janeiro'   => '01',
+        'fevereiro' => '02',
+        'março'     => '03',
+        'abril'     => '04',
+        'maio'      => '05',
+        'junho'     => '06',
+        'julho'     => '07',
+        'agosto'    => '08',
+        'setembro'  => '09',
+        'outubro'   => '10',
+        'novembro'  => '11',
+        'dezembro'  => '12',
+    );
+
+    static $combustiveis = array(
+        1 => 'Gasolina',
+        2 => 'Álcool',
+        3 => 'Diesel',
+    );
+
+    /**
+     * @var \Symfony\Component\Stopwatch\Stopwatch|null
+     */
+    protected $stopwatch = null;
+
+    public function __construct()
+    {
+        $this->stopwatch = new Stopwatch();
+    }
+
     public function getTabelas()
     {
         $crawler = new DomCrawler();
@@ -36,15 +75,36 @@ class Crawler {
         return $tabelas;
     }
 
+    public function getTabelaByAnoMes($ano, $mes)
+    {
+        $tabelas = $this->extractTabelas();
+        foreach ($tabelas['results'] as $tabela) {
+            if (!array_key_exists('ano', $tabela)) {
+                print_r($tabela);
+            }
+            $comparar = $tabela['ano'] . $tabela['mes'];
+            if ($comparar === $ano . $mes) {
+                return $tabela;
+            }
+        }
+
+        return null;
+    }
+
     public function getMarcas($tabela, $tipoVeiculo)
     {
         $params = array(
             'codigoTabelaReferencia' => $tabela,
             'codigoTipoVeiculo'      => $tipoVeiculo,
         );
-        $url = self::$urls['marcas'];
+        $url     = self::$urls['marcas'];
+        $tmp     = json_decode($this->httpPost($url, $params));
+        $records = array();
+        foreach($tmp as $t) {
+            $records[$t->Value] = $t->Label;
+        }
 
-        return json_decode($this->httpPost($url, $params));
+        return $records;
     }
 
     public function getModelos($tabela, $tipoVeiculo, $marca)
@@ -59,14 +119,19 @@ class Crawler {
             'anoModelo'              => '',
             'modeloCodigoExterno'    => '',
         );
-        $url = self::$urls['modelos'];
-        $modelos = json_decode($this->httpPost($url, $params));
+        $url     = self::$urls['modelos'];
+        $tmp     = json_decode($this->httpPost($url, $params));
+        $records = array();
+        foreach($tmp->Modelos as $t) {
+            $records[$t->Value] = $t->Label;
+        }
 
-        return $modelos->Modelos;
+        return $records;
     }
 
     public function getAnoModelos($tabela, $tipoVeiculo, $marca, $modelo)
     {
+
         $params = array(
             'codigoTipoVeiculo'      => $tipoVeiculo,
             'codigoTabelaReferencia' => $tabela,
@@ -77,27 +142,34 @@ class Crawler {
             'anoModelo'              => '',
             'modeloCodigoExterno'    => '',
         );
-        $url = self::$urls['anoModelos'];
+        $url     = self::$urls['anoModelos'];
+        $tmp     = json_decode($this->httpPost($url, $params));
+        $records = array();
+        foreach($tmp as $t) {
+            $records[$t->Value] = $t->Label;
+        }
 
-        return json_decode($this->httpPost($url, $params));
+        return $records;
 
     }
 
-    public function getVeiculo($tabela, $tipoVeiculo, $marca, $modelo, $combustivel, $ano)
+    public function getVeiculo($tabela, $tipo, $marca, $modelo, $combustivel, $ano)
     {
         $params = array(
-            'codigoTipoVeiculo'      => $tipoVei,
+            'codigoTipoVeiculo'      => $tipo,
             'codigoTabelaReferencia' => $tabela,
             'codigoModelo'           => $modelo,
             'codigoMarca'            => $marca,
             'codigoTipoCombustivel'  => $combustivel,
             'anoModelo'              => $ano,
             'modeloCodigoExterno'    => '',
-            'tipoVeiculo'            => self::$tipoVeiculos[$tipoVeiculo],
+            'tipoVeiculo'            => self::$tipoVeiculos[$tipo],
             'tipoConsulta'           => 'tradicional',
         );
-        $url = self::$urls['veiculo'];
-        $veiculo = json_decode(httpPost($url, $params));
+        $url    = self::$urls['veiculo'];
+        $record = json_decode($this->httpPost($url, $params));
+
+        return get_object_vars($record);
     }
 
     public function httpPost($url, $params)
@@ -147,5 +219,154 @@ class Crawler {
 
         return $veiculos;
     }
+
+    public function extractTabelas()
+    {
+        $this->stopwatch->start('progress');
+        $tabelas = $this->getTabelas();
+        $results = array();
+        foreach ($tabelas as $id => $tabela) {
+
+            $tmp = explode('/', $tabela);
+            $results[] = array(
+                'id'  => $id,
+                'lbl' => $tabela,
+                'ano' => trim($tmp[1]),
+                'mes' => trim(self::$meses[$tmp[0]]),
+            );
+        }
+        $event = $this->stopwatch->stop('progress');
+        $data = array(
+            'results'  => $results,
+            'duration' => $event->getDuration(),
+            'memory'   => $event->getMemory(),
+        );
+
+        return $data;
+    }
+
+    public function extractMarcas ($tabela, $tipo)
+    {
+        $this->stopwatch->start('progress');
+        $marcas  = $this->getMarcas($tabela, $tipo);
+        $results = array();
+        foreach ($marcas as $id => $marca) {
+            $results[] = array(
+                'id'      => $id,
+                'lbl'     => $marca,
+                'tipo'    => $tipo,
+                'modelos' => array(),
+                'status'  => false,
+            );
+        }
+        $event = $this->stopwatch->stop('progress');
+        $data = array(
+            'results'  => $results,
+            'duration' => $event->getDuration(),
+            'memory'   => $event->getMemory(),
+        );
+
+        return $data;
+    }
+
+    public function extractModelos ($tabela, $tipo, $marca)
+    {
+        $this->stopwatch->start('progress');
+        $modelos = $this->getModelos($tabela, $tipo, $marca);
+        $results = array();
+        foreach ($modelos as $id => $modelo) {
+            $results[] = array(
+                'id'         => $id,
+                'lbl'        => $modelo,
+                'tipo'       => $tipo,
+                'anoModelos' => array(),
+            );
+        }
+        $event = $this->stopwatch->stop('progress');
+        $data = array(
+            'results'  => $results,
+            'duration' => $event->getDuration(),
+            'memory'   => $event->getMemory(),
+        );
+
+        return $data;
+    }
+
+    public function extractVeiculos ($tabela, $tipo, $marca, $modelo, $getResult = false)
+    {
+        $this->stopwatch->start('progress');
+        $results = array();
+        $anoModelos = $this->getAnoModelos(
+            $tabela, $tipo, $marca, $modelo
+        );
+        foreach ($anoModelos as $id => $anoModelo) {
+            $tmpValue = explode('-', $id);
+            $ano      = $tmpValue[0];
+            $comb     = $tmpValue[1];
+            $tmpResult['anoModelos'][] = array(
+                'id'   => $id,
+                'lbl'  => $anoModelo,
+                'comb' => $comb,
+                'ano'  => $ano,
+            );
+            $veiculo = $this->getVeiculo(
+                $tabela, $tipo, $marca, $modelo, $comb, $ano
+            );
+//            Array
+//            (
+//                [Valor] => R$ 13.753,00
+//                [Marca] => Acura
+//                [Modelo] => Integra Gs 1.8
+//                [AnoModelo] => 1992
+//                [Combustivel] => Gasolina
+//                [CodigoFipe] => 038003-2
+//                [MesReferencia] => março de 2015
+//                [Autenticacao] => hjk51p5djb
+//                [TipoVeiculo] => 1
+//                [SiglaCombustivel] => G
+//                [DataConsulta] => quinta-feira, 5 de março de 2015 04:51:59
+//            )
+
+            $valor = $veiculo['Valor'];
+            $valor = str_replace('R$ ', '', $valor);
+            $valor = str_replace('.', '', $valor);
+            $valor = str_replace(',', '.', $valor);
+            $valor = (int) $valor;
+
+            $tmpMes = explode(' ', $veiculo['MesReferencia']);
+            $mes = self::$meses[$tmpMes[0]];
+
+            $results[] = array(
+                'tabela_id'  => $tabela,
+                'ano'        => $ano,
+                'mes'        => $mes,
+                'tipo'       => $tipo,
+                'fipe_cod'   => $veiculo['CodigoFipe'],
+                'marca_id'   => $marca,
+                'marca'      => $veiculo['Marca'],
+                'modelo_id'  => $marca,
+                'modelo'     => $veiculo['Modelo'],
+                'comb_id'    => $comb,
+                'comb'       => self::$combustiveis[$comb],
+                'comb_sigla' => $veiculo['SiglaCombustivel'],
+                'valor'      => $valor,
+            );
+//            $results[] = array();
+        }
+        $event = $this->stopwatch->stop('progress');
+        $data = array(
+            'anoModResults' => $anoModelos,
+            'veiculosTotal' => count($results),
+            'duration'      => $event->getDuration(),
+            'memory'        => $event->getMemory(),
+        );
+
+        if ($getResult) {
+            $data['results'] = $results;
+        }
+
+        return $data;
+    }
+
 
 }

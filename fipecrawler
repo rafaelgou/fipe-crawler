@@ -1,0 +1,24 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__.'/vendor/autoload.php';
+require_once(__DIR__ . '/config/config.php');
+
+use Fipe\Command\DefaultCommand;
+use Fipe\Command\ExtrairCommand;
+use Symfony\Component\Console\Application;
+use Fipe\Database;
+
+$db = new Fipe\Database($db['host'], $db['dbname'], $db['user'], $db['pass']);
+
+$application = new Application();
+
+$defaultCommand = new DefaultCommand;
+$application->add($defaultCommand);
+$application->setDefaultCommand($defaultCommand->getName());
+
+$extrairCommand = new ExtrairCommand;
+$extrairCommand->setDb($db);
+$application->add($extrairCommand);
+
+$application->run();
