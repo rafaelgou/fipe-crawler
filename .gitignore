@@ -9,3 +9,4 @@ config/config.php
 ./temp
 .DS_Store
 *.csv
+*.swp

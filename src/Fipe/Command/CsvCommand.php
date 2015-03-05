@@ -24,9 +24,20 @@ class CsvCommand extends ExtrairVeiculoCommand
     {
         parent::configure();
 
+        $help = 'Gera CSV para tabela FIPE informando ano, mês e tipo' . PHP_EOL
+            . 'Somente para dados já extraídos para banco de dados locais' . PHP_EOL
+            . '' . PHP_EOL
+            . 'Sintaxe interativa:' . PHP_EOL
+            . './fipecrawler csv:veiculo' . PHP_EOL
+            . '' . PHP_EOL
+            . 'Sintaxe completa' . PHP_EOL
+            . './fipecrawler csv:veiculo ano mes tipo arquivo' . PHP_EOL;
+
+
         $this
-            ->setName('csv:veiculo')
+            ->setName('veiculo:csv')
             ->setDescription('Exporta arquivo CSV por ano, mês e tipo')
+            ->setHelp($help)
             ->addArgument(
                 'arquivo',
                 InputArgument::REQUIRED,
@@ -91,9 +102,9 @@ class CsvCommand extends ExtrairVeiculoCommand
         $progress = new ProgressBar($output, $totalVeiculos);
         $progress->setFormat(" %current%/%max% [%bar%] veículos exportados");
         $progress->start();
-        $content = $this->db->getCsvHeader($veiculos[0]);
+        $content = $this->db->getCsvHeader($veiculos[0], true);
         foreach ($veiculos as $veiculo) {
-            $content .= PHP_EOL . $this->db->prepareCsvRow($veiculo);
+            $content .= PHP_EOL . $this->db->prepareCsvRow($veiculo, true);
             $progress->advance();
         }
         $progress->finish();

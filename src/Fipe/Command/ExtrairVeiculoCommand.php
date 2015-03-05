@@ -23,9 +23,17 @@ class ExtrairVeiculoCommand extends Command
 
     protected function configure()
     {
+        $help = 'Extrai tabela FIPE informando ano, mês e tipo' . PHP_EOL
+              . '' . PHP_EOL
+              . 'Sintaxe interativa:' . PHP_EOL
+              . './fipecrawler extrair:veiculo' . PHP_EOL
+              . '' . PHP_EOL
+              . 'Sintaxe completa' . PHP_EOL
+              . './fipecrawler extrair:veiculo ano mes tipo' . PHP_EOL;
         $this
-            ->setName('extrair:veiculo')
+            ->setName('veiculo:extrair')
             ->setDescription('Extrai tabela por ano, mês e tipo')
+            ->setHelp($help)
             ->addArgument(
                 'ano',
                 InputArgument::REQUIRED,
@@ -39,13 +47,15 @@ class ExtrairVeiculoCommand extends Command
             ->addArgument(
                 'tipo',
                 InputArgument::REQUIRED,
-                'Informe tipo (1 = carro, 2 = moto, 3 = caminhão)'
+                'Informe tipo (Carro, Moto, Caminhão)'
             )
         ;
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
+        $this->banner($output);
+
         $helper = $this->getHelper('question');
         $date = new \DateTime();
 
@@ -103,8 +113,6 @@ class ExtrairVeiculoCommand extends Command
         $tipo     = $tiposRev[$tipoDesc];
 
         $crawler = new Crawler();
-
-        $this->banner($output);
 
         $output->writeln("");
         $output->writeln("<info>Recuperando tabelas para $mes/$ano...</info>");
@@ -220,7 +228,7 @@ class ExtrairVeiculoCommand extends Command
         $output->writeln("<question>$dash</question>");
         $output->writeln("<question>$space</question>");
 
-        $msg = str_pad('  FIPE Crawler', 80, ' ', STR_PAD_RIGHT);
+        $msg = str_pad('  ' . $this->getApplication()->getName(), 80, ' ', STR_PAD_RIGHT);
         $output->writeln("<question>$msg</question>");
 
         $msg = str_pad('  ' . $this->getName(), 80, ' ', STR_PAD_RIGHT);
