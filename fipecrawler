@@ -5,7 +5,8 @@ require __DIR__.'/vendor/autoload.php';
 require_once(__DIR__ . '/config/config.php');
 
 use Fipe\Command\DefaultCommand;
-use Fipe\Command\ExtrairCommand;
+use Fipe\Command\ExtrairVeiculoCommand;
+use Fipe\Command\CsvCommand;
 use Symfony\Component\Console\Application;
 use Fipe\Database;
 
@@ -17,8 +18,12 @@ $defaultCommand = new DefaultCommand;
 $application->add($defaultCommand);
 $application->setDefaultCommand($defaultCommand->getName());
 
-$extrairCommand = new ExtrairCommand;
-$extrairCommand->setDb($db);
-$application->add($extrairCommand);
+$extVeiCommand = new ExtrairVeiculoCommand;
+$extVeiCommand->setDb($db);
+$application->add($extVeiCommand);
+
+$csvCommand = new CsvCommand;
+$csvCommand->setDb($db);
+$application->add($csvCommand);
 
 $application->run();

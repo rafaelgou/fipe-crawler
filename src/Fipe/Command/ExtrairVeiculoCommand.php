@@ -12,8 +12,9 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Fipe\Database;
 use Fipe\Crawler;
+use Symfony\Component\Stopwatch\Stopwatch;
 
-class ExtrairCommand extends Command
+class ExtrairVeiculoCommand extends Command
 {
     /**
      * @var \Fipe\Database
@@ -23,8 +24,8 @@ class ExtrairCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('fipe:extrair')
-            ->setDescription('Extrai tabela informando ano e mês')
+            ->setName('extrair:veiculo')
+            ->setDescription('Extrai tabela por ano, mês e tipo')
             ->addArgument(
                 'ano',
                 InputArgument::REQUIRED,
@@ -88,40 +89,39 @@ class ExtrairCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $stopwatch = new Stopwatch();
+        $stopwatch->start('progress');
+
         $mes  = str_pad($input->getArgument('mes'), 2, '0', STR_PAD_LEFT);
         $ano  = $input->getArgument('ano');
         $tiposRev = array_flip(Crawler::$tipoVeiculosFull);
         $tipoDesc = $input->getArgument('tipo');
+        if (!array_key_exists($tipoDesc, $tiposRev)) {
+            $this->fatal($output, "Tipo não encontrado: $tipoDesc");
+            exit;
+        }
         $tipo     = $tiposRev[$tipoDesc];
-
-//        // green text
-//        $output->writeln('<info>foo</info>');
-//        // yellow text
-//        $output->writeln('<comment>foo</comment>');
-//        // black text on a cyan background
-//        $output->writeln('<question>foo</question>');
-//        // white text on a red background
-//        $output->writeln('<error>foo</error>');
-
-        //$this->extract($ano, $mes, $tipo, $output);
 
         $crawler = new Crawler();
 
+        $this->banner($output);
+
+        $output->writeln("");
         $output->writeln("<info>Recuperando tabelas para $mes/$ano...</info>");
         $tabela = $crawler->getTabelaByAnoMes($ano, $mes);
         if (null === $tabela) {
-            $output->writeln("<error>Não encontrada tabela para $mes/$ano</error>");
+            $this->fatal($output, "Não encontrada tabela para $mes/$ano");
             exit;
         }
         $output->writeln("<comment>Encontrada tabela $mes/$ano !</comment>");
         $output->writeln("");
 
-        $descTabela = "tabela id=[{$tabela['id']}] $mes/$ano, ($tipo) $tipoDesc";
+        $descTabela = "tabela id=[{$tabela['id']}] $mes/$ano, tipo=[{$tipo}] {$tipoDesc}";
         $output->writeln("<info>Recuperando marcas para $descTabela...</info>");
         $marcas = $crawler->extractMarcas($tabela['id'], $tipo);
         $totalMarcas = count($marcas['results']);
         if ($totalMarcas === 0) {
-            $output->writeln("<error>Não encontrada nenhuma marca para $descTabela !</error>");
+            $this->fatal($output, "Não encontrada nenhuma marca para $descTabela !");
             exit;
         }
         $output->writeln("<comment>Encontradas {$totalMarcas} marcas para $descTabela !</comment>");
@@ -153,11 +153,10 @@ class ExtrairCommand extends Command
         $progress->setFormat(" %current%/%max% [%bar%] %ttvei% veículos extraídos");
         $progress->setMessage($totalVeiculos, 'ttvei');
         $progress->start();
-        $veiculos = array();
         foreach($modelos as $marcaId => $marcaModelos) {
             foreach($marcaModelos as $modelo) {
                 $tmpVeiculos  = $crawler->extractVeiculos($tabela['id'], $tipo, $marcaId, $modelo['id'], true);
-                array_merge($veiculos, $tmpVeiculos);
+                $this->db->saveVeiculoCompletos($tmpVeiculos);
                 $totalVeiculos += $tmpVeiculos['veiculosTotal'];
                 $progress->setMessage($totalVeiculos, 'ttvei');
                 $progress->advance();
@@ -165,7 +164,17 @@ class ExtrairCommand extends Command
         }
         $progress->finish();
 
+        $output->writeln("");
+        $output->writeln("<comment>Extraídos $totalVeiculos veículos -- $descTabela !</comment>");
+        $output->writeln("");
 
+        $event = $stopwatch->stop('progress');
+        $duration = $this->seconds2human($event->getDuration());
+        $memory   = $this->memory2human($event->getMemory());
+        $this->alert($output, "FIPE Crawler executado com sucesso em {$duration}, memória {$memory}");
+
+        $output->writeln("<question>FIPE Crawler executado com sucesso!</question>");
+        $output->writeln("");
     }
 
     public function setDb(Database $db)
@@ -173,5 +182,76 @@ class ExtrairCommand extends Command
         $this->db = $db;
     }
 
+    public function fatal(OutputInterface $output, $msg)
+    {
+        $dash  = str_repeat('-', 80);
+        $space = str_repeat(' ', 80);
+        $error = str_pad('** ERRO FATAL **', 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("");
+        $output->writeln("<error>$dash</error>");
+        $output->writeln("<error>$space</error>");
+        $output->writeln("<error>$error</error>");
+        $output->writeln("<error>$space</error>");
+        $msg = str_pad($msg, 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("<error>$msg</error>");
+        $output->writeln("<error>$space</error>");
+        $output->writeln("<error>$dash</error>");
+        exit;
+    }
+
+    public function alert(OutputInterface $output, $msg)
+    {
+        $dash  = str_repeat('-', 80);
+        $space = str_repeat(' ', 80);
+        $msg = str_pad($msg, 80, ' ', STR_PAD_RIGHT);
+
+        $output->writeln("<question>$dash</question>");
+        $output->writeln("<question>$space</question>");
+        $output->writeln("<question>$msg</question>");
+        $output->writeln("<question>$space</question>");
+        $output->writeln("<question>$dash</question>");
+
+    }
+    public function banner(OutputInterface $output)
+    {
+        $dash  = str_repeat('-', 80);
+        $space = str_repeat(' ', 80);
+
+        $output->writeln("<question>$dash</question>");
+        $output->writeln("<question>$space</question>");
+
+        $msg = str_pad('  FIPE Crawler', 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("<question>$msg</question>");
+
+        $msg = str_pad('  ' . $this->getName(), 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("<question>$msg</question>");
+
+        $msg = str_pad('  ' . $this->getDescription(), 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("<question>$msg</question>");
+
+        $output->writeln("<question>$space</question>");
+        $output->writeln("<question>$dash</question>");
+    }
+
+    public function seconds2human($seconds)
+    {
+        $s = $seconds % 60;
+        $m = floor(($seconds % 3600) / 60);
+        $h = floor(($seconds % 86400) / 3600);
+
+        return "{$h}h{$m}m{$s}s";
+    }
+
+    public function memory2human($memory)
+    {
+        if ($memory < 1024) {
+            return $memory . " bytes";
+        } elseif ($memory < 1048576) {
+            return round($memory/1024,2)." kilobytes";
+        } else {
+            return round($memory/1048576,2)." megabytes";
+        }
+
+    }
 
 }

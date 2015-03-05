@@ -25,28 +25,7 @@ class Crawler {
         1 => 'Carro',
         2 => 'Moto',
         3 => 'Caminhão',
-        999 => 'Todos',
-    );
-
-    static $meses = array(
-        'janeiro'   => '01',
-        'fevereiro' => '02',
-        'março'     => '03',
-        'abril'     => '04',
-        'maio'      => '05',
-        'junho'     => '06',
-        'julho'     => '07',
-        'agosto'    => '08',
-        'setembro'  => '09',
-        'outubro'   => '10',
-        'novembro'  => '11',
-        'dezembro'  => '12',
-    );
-
-    static $combustiveis = array(
-        1 => 'Gasolina',
-        2 => 'Álcool',
-        3 => 'Diesel',
+        //999 => 'Todos',
     );
 
     /**
@@ -150,7 +129,6 @@ class Crawler {
         }
 
         return $records;
-
     }
 
     public function getVeiculo($tabela, $tipo, $marca, $modelo, $combustivel, $ano)
@@ -232,7 +210,7 @@ class Crawler {
                 'id'  => $id,
                 'lbl' => $tabela,
                 'ano' => trim($tmp[1]),
-                'mes' => trim(self::$meses[$tmp[0]]),
+                'mes' => trim(Database::$meses[$tmp[0]]),
             );
         }
         $event = $this->stopwatch->stop('progress');
@@ -312,21 +290,6 @@ class Crawler {
             $veiculo = $this->getVeiculo(
                 $tabela, $tipo, $marca, $modelo, $comb, $ano
             );
-//            Array
-//            (
-//                [Valor] => R$ 13.753,00
-//                [Marca] => Acura
-//                [Modelo] => Integra Gs 1.8
-//                [AnoModelo] => 1992
-//                [Combustivel] => Gasolina
-//                [CodigoFipe] => 038003-2
-//                [MesReferencia] => março de 2015
-//                [Autenticacao] => hjk51p5djb
-//                [TipoVeiculo] => 1
-//                [SiglaCombustivel] => G
-//                [DataConsulta] => quinta-feira, 5 de março de 2015 04:51:59
-//            )
-
             $valor = $veiculo['Valor'];
             $valor = str_replace('R$ ', '', $valor);
             $valor = str_replace('.', '', $valor);
@@ -334,24 +297,25 @@ class Crawler {
             $valor = (int) $valor;
 
             $tmpMes = explode(' ', $veiculo['MesReferencia']);
-            $mes = self::$meses[$tmpMes[0]];
+            $mesref = Database::$meses[$tmpMes[0]];
+            $anoref = trim($tmpMes[2]);
 
             $results[] = array(
                 'tabela_id'  => $tabela,
-                'ano'        => $ano,
-                'mes'        => $mes,
+                'anoref'     => $anoref,
+                'mesref'     => $mesref,
                 'tipo'       => $tipo,
-                'fipe_cod'   => $veiculo['CodigoFipe'],
+                'fipe_cod'   => trim($veiculo['CodigoFipe']),
                 'marca_id'   => $marca,
-                'marca'      => $veiculo['Marca'],
-                'modelo_id'  => $marca,
-                'modelo'     => $veiculo['Modelo'],
-                'comb_id'    => $comb,
-                'comb'       => self::$combustiveis[$comb],
-                'comb_sigla' => $veiculo['SiglaCombustivel'],
+                'marca'      => trim($veiculo['Marca']),
+                'modelo_id'  => $modelo,
+                'modelo'     => trim($veiculo['Modelo']),
+                'anomod'     => trim($veiculo['AnoModelo']),
+                'comb_cod'   => $comb,
+                'comb_sigla' => trim($veiculo['SiglaCombustivel']),
+                'comb'       => Database::$combustiveis[$comb],
                 'valor'      => $valor,
             );
-//            $results[] = array();
         }
         $event = $this->stopwatch->stop('progress');
         $data = array(

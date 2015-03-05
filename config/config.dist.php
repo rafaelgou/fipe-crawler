@@ -5,3 +5,4 @@ $db = array(
     'user'   => 'root',
     'pass'   => 'codeloco',
 );
+$baseUrl = 'http://localhost/fipecrawler/web/';

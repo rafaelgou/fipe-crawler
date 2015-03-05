@@ -8,3 +8,4 @@ config/config.php
 /logs
 ./temp
 .DS_Store
+*.csv
