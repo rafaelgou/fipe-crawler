@@ -1,0 +1,49 @@
+<div class="well">
+    <div class="container">
+        <h1>Expotar para CSV</h1>
+        <h2>É preciso primeiro extrair o período</h2>
+
+        <form class="vertical" role="form" name="form">
+
+            <div class="row">
+                <div class="form-group col-lg-4 col-md-5 col-sm-5 col-xs-12"
+                     ng-class="{true: 'has-error', false: ''} [form.tabela.$error.required]">
+                    <label class="control-label">
+                        Tabela/Período
+                        <span ng-show="form.tabela.$error.required" class="help-inline error"> obrigatória</span>
+                    </label>
+                    <p class="form-control-static" ng-show="options.tabelas.length === 0">
+                        <i class="fa fa-spin fa-spinner"></i> carregando tabelas...
+                    </p>
+                    <select name="tabela" ng-model="data.tabela" class="form-control" ng-show="options.tabelas.length > 0"
+                            data-placeholder="Selecione Tabela e Tipo" ng-required="true" ng-disabled="options.tabelas.length === 0"
+                            ng-options="obj.id as obj.lbl for obj in options.tabelas">
+                    </select>
+                </div>
+                <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                    <label class="control-label">&nbsp;</label>
+
+                    <button class="btn btn-primary btn-block" ng-show="options.tabelas.length > 0"
+                            ng-disabled="form.tabela.$error.required"
+                            ng-class="{true: 'btn-danger', false: ''} [form.tabela.$error.required]"
+                            ng-csv="doExportCSV()" filename="{{ csv.filename }}" csv-header="csv.header"
+                            >
+                        <i class="fa fa-table"></i>
+                        Baixar CSV!
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+        <div class="well" ng-show="progress.active">
+            <h4>{{ progress.msg }}</h4>
+            <progressbar class="progress-striped active" max="100" value="progress.prc" type="{{ progress.type }}">
+                {{ progress.bar }} marcas
+            </progressbar>
+        </div>
+
+    </div>
+</div>

@@ -88,6 +88,15 @@ class Controller
         return new JsonResponse($modelos, 200);
     }
 
+    public function csvTabelasAction ()
+    {
+        return new JsonResponse($this->db->findTabelas(), 200);
+    }
+    public function csvVeiculosAction ($tabela, $tipo)
+    {
+        return new JsonResponse($this->db->findVeiculosByTabelaAndTipo($tabela, $tipo), 200);
+    }
+
     public function error404Action ()
     {
         $data = array(

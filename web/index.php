@@ -26,7 +26,7 @@
                         <a href="#/" role="button" class="navbar-brand">
                             FipeCrawler
                         </a>
-                        <li><a href="<?php echo $baseUrl ?>/#">Sobre</a></li>
+                        <li><a href="<?php echo $baseUrl ?>/#/sobre">Sobre</a></li>
                         <li><a href="<?php echo $baseUrl ?>/#/extract"><i class="fa fa-play"></i> Executar</a></li>
                         <li><a href="<?php echo $baseUrl ?>/#/csv"><i class="fa fa-table"></i> Baixar CSV</a></li>
                     </ul>
@@ -43,6 +43,8 @@
     <script src="deps/angular-resource/angular-resource.js"></script>
     <script src="deps/angular-bootstrap/ui-bootstrap.js"></script>
     <script src="deps/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="deps/angular-sanitize/angular-sanitize.js"></script>
+    <script src="deps/ng-csv/build/ng-csv.js"></script>
     <script src="app/FipeCrawlerApp.js"></script>
     <script src="app/errors/ErrorController.js"></script>
     <script src="app/main/MainController.js"></script>

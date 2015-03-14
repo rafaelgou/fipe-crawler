@@ -3,7 +3,8 @@ var APP_PATH = BASE_URL + '/app';
 var FipeCrawlerApp = angular.module('FipeCrawlerApp', [
   'ngRoute',
   'ngResource',
-  'ui.bootstrap'
+  'ui.bootstrap',
+  'ngCsv'
 ]);
 
 FipeCrawlerApp.config(['$routeProvider', function ($routeProvider) {
@@ -26,11 +27,6 @@ FipeCrawlerApp.config(['$routeProvider', function ($routeProvider) {
       controller: 'ExtractController',
       templateUrl: APP_PATH + '/csv/index.html'
     })
-//    .when('/' + module +'/:type/new',
-//    {
-//      controller: moduleController,
-//      templateUrl: baseUrl + '/edit.html'
-//    })
     .when('/404',
     {
       controller: 'ErrorController',

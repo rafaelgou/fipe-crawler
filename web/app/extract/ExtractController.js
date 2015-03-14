@@ -42,6 +42,10 @@ FipeCrawlerApp.controller('ExtractController', [
     };
 
     $scope.extracting = false;
+    $scope.csv = {
+      filename: 'download.csv',
+      header  : []
+    };
 
     $scope._init = function _init() {
 
@@ -56,28 +60,23 @@ FipeCrawlerApp.controller('ExtractController', [
         $scope.extract();
       } else if ( $route.current.originalPath === $scope.routes.csv ) {
         $scope.csv();
-      } else if ( $route.current.originalPath === $scope.routes.index ) {
-        $scope.index();
-      }
+      } else { }
 
     };
 
     $scope.extract = function extract() {
-      _getTabelas();
+      _getTabelas('extract');
     };
 
-    $scope.csv = function csv() {};
+    $scope.csv = function csv() {
+      _getTabelas('csv');
+    };
 
-    $scope.index = function index() {};
-
-    var _getTabelas = function _getTabelas() {
-
-      var params = { action: 'tabelas' };
-
+    var _getTabelas = function _getTabelas(type) {
+      var params = type === 'extract' ? { action: 'tabelas' } : { action: 'csv_tabelas' };
       ResourceModel.get( params )
         .$promise
         .then(function ( response ) {
-          //console.log($scope.options.tabelas);
           $scope.options.tabelas = response.results;
         })
         .catch(function ( error ) {
@@ -86,14 +85,20 @@ FipeCrawlerApp.controller('ExtractController', [
         });
     };
 
-    $scope.doExtractMarcas = function doExtractMarcas() {
+    var _getTabelaLbl = function(id) {
+      for (var i in $scope.options.tabelas) {
+        if ($scope.options.tabelas[i].id === id) {
+          return $scope.options.tabelas[i].lbl.replace('/', '-').replace(' ', '');
+        }
+      }
+    };
 
+    $scope.doExtractMarcas = function doExtractMarcas() {
       $scope.totals = {
         carro   : { marcas: 0, modelos: 0, veiculos: 0 },
         moto    : { marcas: 0, modelos: 0, veiculos: 0 },
         caminhao: { marcas: 0, modelos: 0, veiculos: 0 }
       };
-
       var params = $scope.data;
       params.action ='extract_marcas';
       $scope.extracting = true;
@@ -117,19 +122,14 @@ FipeCrawlerApp.controller('ExtractController', [
               break;
           }
           $scope.setProgress(true, 'info', marcas.length, 0, 'Extraindo modelos de marcas');
-
           async.eachSeries(marcas, function(marca, callbackMarcas) {
             count++;
             $scope.updateProgress(count, 'Extraindo modelos/veículos da marca ' + marca.lbl);
             marca.status = 'run';
-
-            // TODO
             $scope.doExtractModelos( marca , callbackMarcas );
-
           }, function ( error ) {
             $scope.onError( error );
           });
-
         })
         .then(function ( response ) {
           $scope.updateProgress(count, 'Todos modelos/veículos extraídos!');
@@ -140,15 +140,12 @@ FipeCrawlerApp.controller('ExtractController', [
     };
 
     $scope.doExtractModelos = function doExtractModelos( marca, callbackMarcas ) {
-
       if (!$scope.extracting) {
         return;
       }
-
       var params = $scope.data;
       params.action ='extract_modelos_veiculos';
       params.marca  = marca.id;
-
       return ResourceModel.get( params )
         .$promise
         .then(function ( response ) {
@@ -177,81 +174,8 @@ FipeCrawlerApp.controller('ExtractController', [
         });
     };
 
-    //$scope.doExtractVeiculos = function doExtractVeiculos(marca, callbackMarcas) {
-    //
-    //  //async.eachSeries(/* ... */, function(/* ... */, cb1) {
-    //  //  async.eachSeries(/* ... */, function(/* ... */, cb2) {
-    //  //    async.eachSeries(/* ... */, function(/* ... */, cb3) {
-    //  //      cb3(/* ... */);
-    //  //    }, cb2);
-    //  //  }, cb1);
-    //  //}, callback);
-    //
-    //  if (!$scope.extracting) {
-    //    return;
-    //  }
-    //
-    //  var params    = $scope.data;
-    //  params.marca  = marca.id;
-    //  params.action ='extract_veiculos';
-    //
-    //  async.eachSeries(marca.modelos, function(modelo, callbackModelos) {
-    //
-    //    params.modelo = modelo.id;
-    //    $scope.updateProgressMsg('Extraindo veículos do modelo ' + modelo.lbl + ' / marca ' + marca.lbl);
-    //
-    //    //switch($scope.data.tipo) {
-    //    //  case 1:
-    //    //    $scope.totals.carro.veiculos = $scope.totals.carro.veiculos + 10;
-    //    //    break;
-    //    //  case 2:
-    //    //    $scope.totals.moto.veiculos  = $scope.totals.moto.veiculos + 10;
-    //    //    break;
-    //    //  case 3:
-    //    //    $scope.totals.caminhao.veiculos = $scope.totals.caminhao.veiculos + 10;
-    //    //    break;
-    //    //}
-    //    //eachCb();
-    //
-    //    ResourceModel.get( params )
-    //      .$promise
-    //      .then(function ( response ) {
-    //        marca.veiculosTotal = response.results.length;
-    //        switch($scope.data.tipo) {
-    //          case 1:
-    //            $scope.totals.carro.veiculos = $scope.totals.carro.veiculos + marca.veiculosTotal;
-    //            break;
-    //          case 2:
-    //            $scope.totals.moto.veiculos  = $scope.totals.moto.veiculos + marca.veiculosTotal;
-    //            break;
-    //          case 3:
-    //            $scope.totals.caminhao.veiculos = $scope.totals.caminhao.veiculos + marca.veiculosTotal;
-    //            break;
-    //        }
-    //      })
-    //      .then(function () {
-    //        callbackModelos();
-    //      })
-    //      .catch(function ( error ) {
-    //        $scope.onError( error );
-    //      });
-    //
-    //  }, function( error ){
-    //    $scope.onError( error )
-    //  });
-    //
-    //  callbackMarcas();
-    //
-    //  // TODO
-    //  marca.status = 'ok';
-    //
-    //  return true;
-    //};
-
     $scope.cancelExtract = function cancelExtract() {
-
       $scope.extracting = false;
-
       var results = [];
       switch($scope.data.tipo) {
         case 1:
@@ -271,17 +195,9 @@ FipeCrawlerApp.controller('ExtractController', [
         }
         $scope.doExtractModelos( result );
       }
-
     };
 
-
-    /**
-     * Error Handling
-     *
-     * @param error
-     */
     $scope.onError = function onError( error ) {
-
       var modalInstance = $modal.open({
         templateUrl: APP_PATH + '/modal/alert.html',
         controller: 'ModalInstanceCtrl',
@@ -295,16 +211,10 @@ FipeCrawlerApp.controller('ExtractController', [
           }
         }
       });
-
-      modalInstance.result.then(function ( response ) {
-
-      }, function ( response ) {
-
-      });
-
+      modalInstance.result.then(function ( response ) {}, function ( response ) {});
     };
 
-    $scope.setProgress = function ( active, type, max, val, msg ) {
+    $scope.setProgress = function setProgress( active, type, max, val, msg ) {
       $scope.progress = {
         'active': active,
         'type'  : type,
@@ -314,7 +224,7 @@ FipeCrawlerApp.controller('ExtractController', [
       };
     };
 
-    $scope.updateProgress = function ( val, msg ) {
+    $scope.updateProgress = function updateProgress( val, msg ) {
       if (typeof msg !== 'undefined') {
         $scope.progress.msg = msg;
       }
@@ -323,12 +233,35 @@ FipeCrawlerApp.controller('ExtractController', [
       $scope.progress.prc = Math.floor($scope.progress.val / $scope.progress.max * 100);
     };
 
-    $scope.updateProgressMsg = function ( msg ) {
+    $scope.updateProgressMsg = function updateProgressMsg( msg ) {
       $scope.progress.msg = msg;
     };
 
-    $scope.toggleProgress = function ( bool ) {
+    $scope.toggleProgress = function toggleProgress( bool ) {
       $scope.active = (typeof bool !== 'undefined') ? bool : !$scope.active;
+    };
+
+    $scope.doExportCSV = function doExportCSV () {
+
+      var tmp = $scope.data.tabela.split('-')
+      $scope.csv.filename = _getTabelaLbl($scope.data.tabela) + '.csv';
+
+      var params = {
+        action: 'csv_veiculos',
+        tabela: tmp[0],
+        tipo:   tmp[1]
+      };
+
+      return ResourceModel.get( params )
+        .$promise
+        .then(function ( response ) {
+          $scope.csv.header = response.header;
+          return response.results;
+        })
+        .catch(function ( error ) {
+          console.log(error);
+          $scope.onError( error );
+        });
     };
 
     $scope._init();

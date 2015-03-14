@@ -28,6 +28,12 @@ class Database {
         4 => 'Flex',
     );
 
+    static $tipos = array(
+        1 => 'Carro',
+        2 => 'Moto',
+        3 => 'Caminhão',
+    );
+
     public function __construct($host, $dbname, $user, $pass)
     {
         $dsn = "mysql:dbname={$dbname};host={$host}";
@@ -238,23 +244,28 @@ class Database {
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-
 //    public function findVeiculoByFipeAndAnomod($fipeCod, $anomod)
 //    {
-//
-//    }
-//
 //SELECT * FROM veiculo_completo
 //WHERE fipe_cod LIKE "%501014-4%"
 //AND anomod = 1999
+//    }
+//
 
     public function getCsvHeader($row, $noId = false, $separator = ',')
+    {
+        $row = $this->getCsvHeaderArray($row, $noId);
+
+        return implode($separator, $row);
+    }
+
+    public function getCsvHeaderArray($row, $noId = false)
     {
         if ($noId) {
             unset($row['id']);
         }
 
-        return implode($separator, array_keys($row));
+        return array_keys($row);
     }
 
     public function prepareCsvRow($row, $noId = false, $separator = ',')
@@ -265,5 +276,42 @@ class Database {
 
         return implode($separator, $row);
     }
+
+    public function findTabelas()
+    {
+        $sql = "SELECT DISTINCT tabela_id, anoref, mesref, tipo FROM veiculo_completo ORDER BY anoref DESC, mesref DESC, tipo";
+        $stmt = $this->conn->prepare($sql, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY));
+        $stmt->execute();
+        $tabelasResult = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $mesesFlip = array_flip(self::$meses);
+        $tabelas = array();
+        foreach($tabelasResult as $tab) {
+            $mesref    = str_pad($tab['mesref'],2,'0',STR_PAD_LEFT);
+            $mesref    = $mesesFlip[$mesref];
+            $tabelas[] = array(
+                'id'  => $tab['tabela_id'] . '-' . $tab['tipo'],
+                'lbl' => "{$mesref}/{$tab['anoref']} - " . self::$tipos[$tab['tipo']],
+            );
+        }
+
+        return array('results' => $tabelas);
+    }
+
+    public function findVeiculosByTabelaAndTipo($tabela, $tipo)
+    {
+        $sql = "SELECT * FROM veiculo_completo WHERE tabela_id = :tabela_id AND tipo = :tipo";
+        $stmt = $this->conn->prepare($sql, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY));
+        $stmt->execute(array(
+            ':tabela_id'  => $tabela,
+            ':tipo'       => $tipo,
+        ));
+        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array(
+            'results' => $results,
+            'header'  => $this->getCsvHeaderArray($results[0])
+        );
+    }
+
 
 }
