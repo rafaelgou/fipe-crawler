@@ -6,6 +6,9 @@ Script que realiza download dos dados do site da FIPE [http://www2.fipe.org.br/p
 
 ### Requisitos
 
+
+#### LINUX
+
 Pacotes `php5`, `php5-cli`, `php-mysql`, `php5-curl`, `php5-json`.
 
 Para Ubuntu/Debian, pode ser instalado com:
@@ -19,6 +22,28 @@ Descompactar o arquivo em um diretório:
 ~~~bash
 tar xzvf fipecrawler.tar.gz
 ~~~
+
+Alterar permissão do arquivo executável:
+
+~~~bash
+chmod 755 ./fipecrawler
+~~~
+
+#### Windows
+
+Descompactar arquivo
+
+~~~bash
+unzip fipecrawler.zip
+~~~
+
+Editar caminho para executar PHP no arquivo `fipecrawler.bat`:
+
+~~~bash
+\CAMINHO\ATE\PHP\php src\fipecrawler.php
+~~~
+
+### Banco de DAdos
 
 Configurar banco de dados:
 
@@ -41,14 +66,6 @@ $baseUrl = 'http://localhost/fipecrawler/web/';
 ~~~
 
 `$baseUrl` não é utilizada pela linha de comando.
-
-Alterar permissão do arquivo executável:
-
-~~~bash
-chmod 755 ./fipecrawler
-~~~
-
-### Instalar banco de dados
 
 Na versão atual utilize o arquivo `sql/veiculo.sql` para criar a tabela `veiculo_completo`.
 

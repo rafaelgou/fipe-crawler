@@ -49,6 +49,13 @@
 
         </form>
 
+        <div class="well" ng-show="progress.active">
+            <h4>{{ progress.msg }}</h4>
+            <progressbar class="progress-striped active" max="100" value="progress.prc" type="{{ progress.type }}">
+                {{ progress.bar }} marcas
+            </progressbar>
+        </div>
+
     </div>
 </div>
 <div class="container" ng-show="true">
@@ -58,7 +65,7 @@
              ng-show="data.tipo === 999 || data.tipo === 1">
             <button class="btn btn-default btn-lg btn-block">
                 <i class="fa fa-car"></i> Carros
-                <small ng-show="extracting"> Modelos: {{ totals.carro.modelos }} / Veiculos: {{ totals.carro.veiculos }}</small>
+                <small ng-show="extracting"> Marcas: {{ totals.carro.marcas }} / Modelos: {{ totals.carro.modelos }} / Veiculos: {{ totals.carro.veiculos }}</small>
             </button>
             <ul class="marcas list-group">
                 <li class="list-group-item"ng-repeat="marca in results.carro">
@@ -68,18 +75,17 @@
                         <i class="fa fa-spin fa-circle-o-notch" ng-show="marca.status == 'run'"></i>
                         <i class="fa fa-warning" ng-show="marca.status == 'cancel'"></i>
                         <br/>
-                        <small>Total Modelos: {{ marca.modelos.length }}</small>
+                        <small>Total Modelos: {{ marca.modelos.length }} / Total Veículos: {{ marca.veiculosTotal }}</small>
                     </h5>
                 </li>
             </ul>
         </div>
 
-
         <div ng-class="{ true: 'col-xs-4', false: 'col-xs-12'} [data.tipo === 999]"
              ng-show="data.tipo === 999 || data.tipo === 2">
             <button class="btn btn-default btn-lg btn-block">
                 <i class="fa fa-motorcycle"></i> Motos
-                <small ng-show="extracting"> Modelos: {{ totals.moto.modelos }} / Veiculos: {{ totals.moto.veiculos }}</small>
+                <small ng-show="extracting"> Marcas: {{ totals.moto.marcas }} / Modelos: {{ totals.moto.modelos }} / Veiculos: {{ totals.moto.veiculos }}</small>
             </button>
             <ul class="marcas list-group">
                 <li class="list-group-item"ng-repeat="marca in results.moto">
@@ -89,18 +95,17 @@
                         <i class="fa fa-spin fa-circle-o-notch" ng-show="marca.status == 'run'"></i>
                         <i class="fa fa-warning" ng-show="marca.status == 'cancel'"></i>
                         <br/>
-                        <small>Total Modelos: {{ marca.modelos.length }}</small>
+                        <small>Total Modelos: {{ marca.modelos.length }} / Total Veículos: {{ marca.veiculosTotal }}</small>
                     </h5>
                 </li>
             </ul>
         </div>
 
-
         <div ng-class="{ true: 'col-xs-4', false: 'col-xs-12'} [data.tipo === 999]"
              ng-show="data.tipo === 999 || data.tipo === 3">
             <button class="btn btn-default btn-lg btn-block">
                 <i class="fa fa-truck"></i> Caminhão
-                <small ng-show="extracting"> Modelos: {{ totals.caminhao.modelos }} / Veiculos: {{ totals.caminhao.veiculos }}</small>
+                <small ng-show="extracting"> Marcas: {{ totals.caminhao.marcas }} / Modelos: {{ totals.caminhao.modelos }} / Veiculos: {{ totals.caminhao.veiculos }}</small>
             </button>
             <ul class="marcas list-group">
                 <li class="list-group-item"ng-repeat="marca in results.caminhao">
@@ -110,7 +115,7 @@
                         <i class="fa fa-spin fa-circle-o-notch" ng-show="marca.status == 'run'"></i>
                         <i class="fa fa-warning" ng-show="marca.status == 'cancel'"></i>
                         <br/>
-                        <small>Total Modelos: {{ marca.modelos.length }}</small>
+                        <small>Total Modelos: {{ marca.modelos.length }} / Total Veículos: {{ marca.veiculosTotal }}</small>
                     </h5>
                 </li>
             </ul>

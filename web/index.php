@@ -37,6 +37,7 @@
 
     <div data-ng-view=""></div>
 
+    <script src="deps/async/lib/async.js"></script>
     <script src="deps/angular/angular.js"></script>
     <script src="deps/angular-route/angular-route.js"></script>
     <script src="deps/angular-resource/angular-resource.js"></script>

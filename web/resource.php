@@ -43,6 +43,14 @@ switch ($action) {
         $response = $controller->extractVeiculosAction($tabela, $tipo, $marca, $modelo);
         break;
 
+    case 'extract_modelos_veiculos':
+        $tabela = $request->get('tabela', null);
+        $tipo   = $request->get('tipo', null);
+        $marca  = $request->get('marca', null);
+        $response = $controller->extractModelosVeiculosAction($tabela, $tipo, $marca);
+        break;
+
+
     default:
     case '404':
         $response = $controller->error404Action();

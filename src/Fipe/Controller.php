@@ -65,12 +65,27 @@ class Controller
 
     public function extractModelosAction ($tabela, $tipo, $marca)
     {
-        return new JsonResponse($this->crawler->extractModelos ($tabela, $tipo, $marca), 200);
+        return new JsonResponse($this->crawler->extractModelos($tabela, $tipo, $marca), 200);
     }
 
     public function extractVeiculosAction ($tabela, $tipo, $marca, $modelo)
     {
-        return new JsonResponse($this->crawler->extractVeiculos ($tabela, $tipo, $marca, $modelo), 200);
+        $tmpVeiculos = $this->crawler->extractVeiculos($tabela, $tipo, $marca, $modelo, true);
+        $this->db->saveVeiculoCompletos($tmpVeiculos);
+        return new JsonResponse($tmpVeiculos, 200);
+    }
+
+    public function extractModelosVeiculosAction ($tabela, $tipo, $marca)
+    {
+        $modelos = $this->crawler->extractModelos($tabela, $tipo, $marca);
+        $veiculosTotal = 0;
+        foreach ($modelos['results'] as $key => $modelo) {
+            $tmpVeiculos = $this->crawler->extractVeiculos($tabela, $tipo, $marca, $modelo, true);
+            $this->db->saveVeiculoCompletos($tmpVeiculos);
+            $veiculosTotal += count($tmpVeiculos);
+        }
+        $modelos['veiculosTotal'] = $veiculosTotal;
+        return new JsonResponse($modelos, 200);
     }
 
     public function error404Action ()
