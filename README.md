@@ -37,13 +37,7 @@ Descompactar arquivo
 unzip fipecrawler.zip
 ~~~
 
-Editar caminho para executar PHP no arquivo `fipecrawler.bat`:
-
-~~~bash
-\CAMINHO\ATE\PHP\php src\fipecrawler.php
-~~~
-
-### Banco de DAdos
+### Banco de Dados
 
 Configurar banco de dados:
 
@@ -60,7 +54,7 @@ $db = array(
     'host'   => 'localhost',
     'dbname' => 'fipe',
     'user'   => 'root',
-    'pass'   => 'codeloco',
+    'pass'   => 'senha',
 );
 $baseUrl = 'http://localhost/fipecrawler/web/';
 ~~~
@@ -72,6 +66,8 @@ Na versão atual utilize o arquivo `sql/veiculo.sql` para criar a tabela `veicul
 Pode ser instalado em qualquer banco MySQL, devidamente configurado no arquivo `config/config.php`.
 
 ## Execução via linha de comando
+
+### Linux
 
 Na raiz do sistema, execute:
 
@@ -87,9 +83,32 @@ veiculo
  veiculo:extrair   Extrai tabela por ano, mês e tipo
 ~~~
 
-Para verificar se a configuração mínima está funcional.
+Possível então:
+
+~~~bash
+./fipecrawler veiculo:extrair
+./fipecrawler veiculo:csv
+~~~
+
+### Windows
+
+~~~bash
+C:\CAMINHO_EXECUTAVEL_PHP\src\fipecrawler.php
+C:\CAMINHO_EXECUTAVEL_PHP\src\fipecrawler.php veiculo:extrair
+C:\CAMINHO_EXECUTAVEL_PHP\src\fipecrawler.php veiculo:csv
+~~~
+
+
 
 ### Extraindo tabelas
+
+**Observação Windows 1**: adapte a linha de comando ao windows conforme item anterior.
+
+**Observação Windows 2**: As opções de linha de comando a seguir podem 
+apresentar problemas por questões de acentuação. Utilize o modo interativo
+
+**Observação Windows 3**: A barra de progresso pode não funcionar adequadamente,
+devido a diferenças de ambiente. Mas o processo ocorre em background.
 
 Execute o comando informando ano, mês e tipo (Carro, Moto, Caminhão, case sensitive),
 ou use a sintaxe interativa, que pergunta item por item.
@@ -239,5 +258,13 @@ fipe_cod,tabela_id,anoref,mesref,tipo,marca_id,marca,modelo_id,modelo,anomod,com
 
 ## Versão WEB
 
-TODO
-libapache2-mod-php5
+Descompacte o conteúdo na raiz de sua árvore web. Opcionalmente você pode criar um VirtualHost,
+link simbólico ou alias para o diretório `web/`
+
+~~~bash
+apt-get install apache2 libapache2-mod-php5
+~~~
+
+Considerando que foi descompatado na raiz, você terá a interface web navegando em
+[http://localhost/fipecrawler/web].
+
