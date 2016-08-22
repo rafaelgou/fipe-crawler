@@ -1,8 +1,8 @@
 <?php
 $db = array(
     'host'   => 'localhost',
-    'dbname' => 'fipe',    
+    'dbname' => 'fipe',
     'user'   => 'root',
-    'pass'   => 'codeloco',
+    'pass'   => 'senha',
 );
-$baseUrl = 'http://localhost/fipecrawler/web/';
+$baseUrl = 'http://fipe.dev/';

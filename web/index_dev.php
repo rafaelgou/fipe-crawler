@@ -37,7 +37,20 @@
 
     <div data-ng-view=""></div>
 
-    <script src="js/app.js"></script>
+    <script src="deps/async/lib/async.js"></script>
+    <script src="deps/angular/angular.js"></script>
+    <script src="deps/angular-route/angular-route.js"></script>
+    <script src="deps/angular-resource/angular-resource.js"></script>
+    <script src="deps/angular-bootstrap/ui-bootstrap.js"></script>
+    <script src="deps/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="deps/angular-sanitize/angular-sanitize.js"></script>
+    <script src="deps/ng-csv/build/ng-csv.js"></script>
+    <script src="app/FipeCrawlerApp.js"></script>
+    <script src="app/errors/ErrorController.js"></script>
+    <script src="app/main/MainController.js"></script>
+    <script src="app/extract/ExtractController.js"></script>
+    <script src="app/extract/ResourceModel.js"></script>
+    <script src="app/modal/ModalController.js"></script>
 
 </body>
 </html>

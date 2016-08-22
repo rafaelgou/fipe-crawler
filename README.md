@@ -1,54 +1,44 @@
 # FIPE Crawler
 
-Script que realiza download dos dados do site da FIPE [http://www2.fipe.org.br/pt-br/indices/veiculos/].
+Script que realiza download dos dados da [Tabela FIPE Preço Médio de Veículos](http://veiculos.fipe.org.br/).
 
-## Instalação versão linha de comando
+## Instalação
 
-### Requisitos
+**Requisitos**
 
+*   Versão linha de comando: PHP + PHP-CLI, MySQL, [Composer](getcomposer.org).
+*   Versão Web: PHP, Apache, MySQL, [Composer](getcomposer.org).
+*   Desenvolvimento versão Web: [NodeJS](https://nodejs.org)
+e [Bower](https://bower.io)
 
-#### LINUX
+### Instalação versão linha de comando
 
-Pacotes `php5`, `php5-cli`, `php-mysql`, `php5-curl`, `php5-json`.
+```bash
+apt-get install php5 php5-cli php-mysql php5-curl php5-json mysql-server-5.5
+git clone https://github.com/rafaelgou/fipe-crawler.git
+curl -sS https://getcomposer.org/installer | php
+./composer.phar install
+```
 
-Para Ubuntu/Debian, pode ser instalado com:
+### Instalação versão Web
 
-~~~bash
-apt-get install php5 php5-cli php-mysql php5-curl php5-json
-~~~
+```bash
+apt-get install php5 php5-cli php-mysql php5-curl php5-json mysql-server-5.5 apache2 libapache2-mod-php5
+git clone https://github.com/rafaelgou/fipe-crawler.git
+curl -sS https://getcomposer.org/installer | php
+./composer.phar install
+```
 
-Descompactar o arquivo em um diretório:
+### Configuração
 
-~~~bash
-tar xzvf fipecrawler.tar.gz
-~~~
-
-Alterar permissão do arquivo executável:
-
-~~~bash
-chmod 755 ./fipecrawler
-~~~
-
-#### Windows
-
-Descompactar arquivo
-
-~~~bash
-unzip fipecrawler.zip
-~~~
-
-### Banco de Dados
-
-Configurar banco de dados:
-
-~~~bash
+```bash
 cd fipecrawler/config
 cp config.dist.php config.php
-~~~
+```
 
-Editar informações de acesso ao banco:
+Editar informações de acesso ao banco e URL para versão Web:
 
-~~~php
+```php
 <?php
 $db = array(
     'host'   => 'localhost',
@@ -56,76 +46,52 @@ $db = array(
     'user'   => 'root',
     'pass'   => 'senha',
 );
-$baseUrl = 'http://localhost/fipecrawler/web/';
-~~~
+```
 
-`$baseUrl` não é utilizada pela linha de comando.
+Crie a tabela `veiculo` no banco de dados com o seguinte comando:
 
-Na versão atual utilize o arquivo `sql/veiculo.sql` para criar a tabela `veiculo_completo`.
-
-Pode ser instalado em qualquer banco MySQL, devidamente configurado no arquivo `config/config.php`.
+```bash
+mysql fipe -u root -p < sql/veiculo.sql
+```
 
 ## Execução via linha de comando
 
-### Linux
-
 Na raiz do sistema, execute:
 
-~~~bash
+```bash
 ./fipecrawler
-~~~
+```
 
 que exibe ajuda padrão e lista de comandos do sistema:
 
-~~~bash
+```bash
 veiculo
  veiculo:csv       Exporta arquivo CSV por ano, mês e tipo
  veiculo:extrair   Extrai tabela por ano, mês e tipo
-~~~
+```
 
 Possível então:
 
-~~~bash
+```bash
 ./fipecrawler veiculo:extrair
 ./fipecrawler veiculo:csv
-~~~
-
-### Windows
-
-~~~bash
-C:\CAMINHO_EXECUTAVEL_PHP\src\fipecrawler.php
-C:\CAMINHO_EXECUTAVEL_PHP\src\fipecrawler.php veiculo:extrair
-C:\CAMINHO_EXECUTAVEL_PHP\src\fipecrawler.php veiculo:csv
-~~~
-
-
+```
 
 ### Extraindo tabelas
 
-**Observação Windows 1**: adapte a linha de comando ao windows conforme item anterior.
-
-**Observação Windows 2**: As opções de linha de comando a seguir podem 
-apresentar problemas por questões de acentuação. Utilize o modo interativo
-
-**Observação Windows 3**: A barra de progresso pode não funcionar adequadamente,
-devido a diferenças de ambiente. Mas o processo ocorre em background.
-
-Execute o comando informando ano, mês e tipo (Carro, Moto, Caminhão, case sensitive),
-ou use a sintaxe interativa, que pergunta item por item.
-
-~~~bash
+```bash
 ./fipecrawler veiculo:extrair 2015 3 Caminhão
-~~~
+```
 
 ou
 
-~~~bash
+```bash
 ./fipecrawler veiculo:extrair
-~~~
+```
 
-que pergunta:
+o que pergunta:
 
-~~~bash
+```bash
 --------------------------------------------------------------------------------
 
   FIPE Crawler
@@ -169,14 +135,14 @@ Informe tipo (1 = carro, 2 = moto, 3 = caminhão) (ENTER para Carro)
   [2] Moto
   [3] Caminhão
  >
-~~~
+```
 
-após, realiza a extração e salva em banco. Este procedimento é demorado, e depende da
-velocidade de sua conexão e disponibilidade do site da FIPE.
+após, realiza a extração e salva em banco. Este procedimento é demorado,
+e depende da velocidade de sua conexão e disponibilidade do site da FIPE.
 
 Você pode acompanhar o progresso nesta tela:
 
-~~~bash
+```bash
 Recuperando tabelas para 03/2015...
 Encontrada tabela 03/2015 !
 
@@ -190,7 +156,7 @@ Encontrados 4562 modelos para 87 marcas -- tabela id=[176] 03/2015, tipo=[1] Car
 
 Recuperando veiculos para para 4562 -- tabela id=[176] 03/2015, tipo=[1] Carro...
     6/4562 [>---------------------------] 36 veículos extraídos
-~~~
+```
 
 Neste ponto os dados já podem ser vistos no banco de dados. Como a tabela
 possui chave única para `fipe_cod + anomod`, não há duplicação, mesmo se rodar
@@ -198,21 +164,22 @@ mais de uma vez para o mesmo período.
 
 ### Exportando CSV tabelas
 
-Executado da mesma forma que o `veiculo:extrair`, mas solicita o nome do arquivo de exportação.
+Executado da mesma forma que o `veiculo:extrair`, mas solicita o
+nome do arquivo de exportação.
 
-~~~bash
+```bash
 ./fipecrawler veiculo:csv 2015 3 Caminhão
-~~~
+```
 
 ou
 
-~~~bash
+```bash
 ./fipecrawler veiculo:csv
-~~~
+```
 
 Exemplo:
 
-~~~bash
+```bash
 ./fipecrawler veiculo:csv 2015 3 Caminhão
 --------------------------------------------------------------------------------
 
@@ -237,11 +204,11 @@ Exportados 78 veículos para tabela 03/2015, tipo=[3] Caminhão !
 Tentando salvar arquivo /var/www/Clientes/DiegoVeiga/Fipe/fipecrawler/fipe_201503_Caminhão.csv...
 Criado arquivo /var/www/Clientes/DiegoVeiga/Fipe/fipecrawler/fipe_201503_Caminhão.csv !
 
-~~~
+```
 
 Arquivo exemplo:
 
-~~~bash
+```bash
 fipe_cod,tabela_id,anoref,mesref,tipo,marca_id,marca,modelo_id,modelo,anomod,comb_cod,comb_sigla,comb,valor
 501034-9,176,2015,3,3,102,Agrale,5986,10000 2P (Diesel) (E5),32000,3,D,Diesel,134625
 501034-9,176,2015,3,3,102,Agrale,5986,10000 2P (Diesel) (E5),2015,3,D,Diesel,119985
@@ -254,17 +221,69 @@ fipe_cod,tabela_id,anoref,mesref,tipo,marca_id,marca,modelo_id,modelo,anomod,com
 501027-6,176,2015,3,3,102,Agrale,4448,13000 Turbo 2P (Diesel),2009,3,D,Diesel,82993
 501027-6,176,2015,3,3,102,Agrale,4448,13000 Turbo 2P (Diesel),2008,3,D,Diesel,79413
 501027-6,176,2015,3,3,102,Agrale,4448,13000 Turbo 2P (Diesel),2007,3,D,Diesel,72479
-~~~
+```
 
 ## Versão WEB
 
-Descompacte o conteúdo na raiz de sua árvore web. Opcionalmente você pode criar um VirtualHost,
-link simbólico ou alias para o diretório `web/`
+Descompacte/clone o conteúdo na raiz de sua árvore web. Opcionalmente você pode criar um VirtualHost,
+link simbólico ou alias para o diretório `web/`.
 
-~~~bash
-apt-get install apache2 libapache2-mod-php5
-~~~
+Considerando que você utiliza o Apache2, necessita:
+
+```bash
+composer install
+```
+
+```bash
+cd fipecrawler/config
+cp config.dist.php config.php
+```
+
+Editar informações de acesso ao banco:
+
+```php
+<?php
+$db = array(
+    'host'   => 'localhost',
+    'dbname' => 'fipe',
+    'user'   => 'root',
+    'pass'   => 'senha',
+);
+```
 
 Considerando que foi descompatado na raiz, você terá a interface web navegando em
-[http://localhost/fipecrawler/web].
+[http://localhost/fipecrawler/web](http://localhost/fipecrawler/web).
 
+Se quiser navegar na versão de desenvolvimento, utilize
+[http://localhost/fipecrawler/web/index_dev.php](http://localhost/fipecrawler/web/index_dev.php).
+
+## Consultas
+
+Verifique a tabela [veiculo](sql/veiculo.sql) para a estrutura de dados.
+
+Informações úteis podem ser conseguidas com as seguintes consultas:
+
+*   Lista de marcas
+
+```sql
+SELECT DISTINCT marca_id, marca FROM veiculo ORDER BY marca;
+```
+
+*   Lista de marcas e modelos
+
+```sql
+SELECT DISTINCT marca_id, marca, modelo_id, modelo FROM veiculo ORDER BY marca, modelo;
+```
+
+*   Filtrar por tipo (1 = carro, 2 = moto, 3 = caminhão)
+
+```sql
+-- Selecionando carros
+SELECT * FROM veiculo WHERE tipo = 1;
+```
+
+*   Lista de combustíveis
+
+```sql
+SELECT DISTINCT comb_sigla, comb FROM veiculo_completo ORDER BY comb_sigla, comb;
+```

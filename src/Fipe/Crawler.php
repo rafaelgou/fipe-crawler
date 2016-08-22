@@ -8,11 +8,11 @@ use Symfony\Component\Stopwatch\Stopwatch;
 class Crawler {
 
     static $urls = array(
-        'tabelas'    => 'http://www2.fipe.org.br/pt-br/indices/veiculos',
-        'marcas'     => 'http://www2.fipe.org.br/IndicesConsulta-ConsultarMarcas',
-        'modelos'    => 'http://www2.fipe.org.br/IndicesConsulta-ConsultarModelos',
-        'anoModelos' => 'http://www2.fipe.org.br/IndicesConsulta-ConsultarAnoModelo',
-        'veiculo'    => 'http://www2.fipe.org.br/IndicesConsulta-ConsultarValorComTodosParametros',
+        'tabelas'    => 'http://www.fipe.org.br/pt-br/indices/veiculos',
+        'marcas'     => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarMarcas',
+        'modelos'    => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarModelos',
+        'anoModelos' => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarAnoModelo',
+        'veiculo'    => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarValorComTodosParametros',
     );
 
     static $tipoVeiculos = array(

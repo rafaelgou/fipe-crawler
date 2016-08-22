@@ -5,6 +5,7 @@ require_once(__DIR__ . '/../config/config.php');
 
 use Fipe\Command\ExtrairVeiculoCommand;
 use Fipe\Command\CsvCommand;
+use Fipe\Command\JavascriptCommand;
 use Symfony\Component\Console\Application;
 use Fipe\Database;
 
@@ -20,5 +21,7 @@ $app->add($extVeiCommand);
 $csvCommand = new CsvCommand;
 $csvCommand->setDb($db);
 $app->add($csvCommand);
+
+$app->add(new JavascriptCommand);
 
 $app->run();

@@ -10,3 +10,5 @@ config/config.php
 .DS_Store
 *.csv
 *.swp
+composer.phar
+composer
