@@ -236,7 +236,7 @@ class ExtrairVeiculoCommand extends Command
         if (!$input->getArgument('tipo')) {
             $question = new ChoiceQuestion(
                 'Informe tipo (1 = carro, 2 = moto, 3 = caminhão) (ENTER para Carro)',
-                Crawler::$tipoVeiculosFull,
+                Crawler::$tiposFull,
                 1
             );
             $input->setArgument('tipo', $helper->ask($input, $output, $question));
@@ -258,7 +258,7 @@ class ExtrairVeiculoCommand extends Command
 
         $mes  = str_pad($input->getArgument('mes'), 2, '0', STR_PAD_LEFT);
         $ano  = $input->getArgument('ano');
-        $tiposRev = array_flip(Crawler::$tipoVeiculosFull);
+        $tiposRev = array_flip(Crawler::$tiposFull);
         $tipoDesc = $input->getArgument('tipo');
         if (!array_key_exists($tipoDesc, $tiposRev)) {
             $this->fatal($output, "Tipo não encontrado: $tipoDesc");

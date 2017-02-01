@@ -74,7 +74,7 @@ class CsvCommand extends ExtrairVeiculoCommand
 
         $mes  = str_pad($input->getArgument('mes'), 2, '0', STR_PAD_LEFT);
         $ano  = $input->getArgument('ano');
-        $tiposRev = array_flip(Crawler::$tipoVeiculosFull);
+        $tiposRev = array_flip(Crawler::$tiposFull);
         $tipoDesc = $input->getArgument('tipo');
         if (!array_key_exists($tipoDesc, $tiposRev)) {
             $this->fatal($output, "Tipo não encontrado: $tipoDesc");
@@ -104,7 +104,7 @@ class CsvCommand extends ExtrairVeiculoCommand
     {
         $mes  = str_pad($input->getArgument('mes'), 2, '0', STR_PAD_LEFT);
         $ano  = $input->getArgument('ano');
-        $tiposRev = array_flip(Crawler::$tipoVeiculosFull);
+        $tiposRev = array_flip(Crawler::$tiposFull);
         $tipoDesc = $input->getArgument('tipo');
         if (!array_key_exists($tipoDesc, $tiposRev)) {
             $this->fatal($output, "Tipo não encontrado: $tipoDesc");
