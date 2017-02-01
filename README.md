@@ -2,14 +2,15 @@
 
 Script que realiza download dos dados da [Tabela FIPE Preço Médio de Veículos](http://veiculos.fipe.org.br/).
 
+Licensa: [MIT](LICENSE.md)
+
 ## Instalação
 
 **Requisitos**
 
 *   Versão linha de comando: PHP + PHP-CLI, MySQL, [Composer](getcomposer.org).
 *   Versão Web: PHP, Apache, MySQL, [Composer](getcomposer.org).
-*   Desenvolvimento versão Web: [NodeJS](https://nodejs.org)
-e [Bower](https://bower.io)
+*   Desenvolvimento versão Web: [NodeJS](https://nodejs.org) e [Bower](https://bower.io)
 
 ### Instalação versão linha de comando
 
@@ -28,6 +29,11 @@ git clone https://github.com/rafaelgou/fipe-crawler.git
 curl -sS https://getcomposer.org/installer | php
 ./composer.phar install
 ```
+Para desenvolvimento utilize também `bower install` (exige [NodeJS](https://nodejs.org) ).
+
+A versão Web foi construída [AngularJS](http://angularjs.org) v1.3.20, ou seja,
+está bastante desatualizada. Utilize preferencialmente a versão de linha de
+comando.
 
 ### Configuração
 
