@@ -1,7 +1,12 @@
 <?php
 /**
  * Fipe Crawler
- * @author Rafael Goulart <rafaelgou@gmail.com>
+ *
+ * @category Controller
+ * @package  Fipe
+ * @author   Rafael Goulart <rafaelgou@gmail.com>
+ * @license  MIT <https://github.com/rafaelgou/fipe-crawler/LICENSE.md>
+ * @link     https://github.com/rafaelgou/fipe-crawler
  */
 
 namespace Fipe;
@@ -13,7 +18,12 @@ use Symfony\Component\Stopwatch\Stopwatch;
 
 /**
  * Classe Controller
- * @author Rafael Goulart <rafaelgou@gmail.com>
+ *
+ * @category Crawler
+ * @package  Fipe
+ * @author   Rafael Goulart <rafaelgou@gmail.com>
+ * @license  MIT <https://github.com/rafaelgou/fipe-crawler/LICENSE.md>
+ * @link     https://github.com/rafaelgou/fipe-crawler
  */
 class Controller
 {
@@ -42,6 +52,14 @@ class Controller
      */
     protected $stopwatch = null;
 
+    /**
+     * Construtor
+     *
+     * @param Request  $request Requisição
+     * @param Database $db      Banco de dados
+     *
+     * @return void
+     */
     public function __construct(Request $request, Database $db)
     {
         $this->request   = $request;
@@ -53,65 +71,133 @@ class Controller
         $this->session->set('name', 'FipeCrawler');
     }
 
-    public function indexAction ()
+    /**
+     * Ação Índice
+     *
+     * @return JsonResponse
+     */
+    public function indexAction()
     {
         $data = array(
-            'msg'   => 'Index'
+            'msg'   => 'Index',
         );
+
         return new JsonResponse($data, 200);
     }
 
-    public function tabelasAction ()
+    /**
+     * Ação Tabelas
+     *
+     * @return JsonResponse
+     */
+    public function tabelasAction()
     {
         return new JsonResponse($this->crawler->extractTabelas(), 200);
     }
 
-    public function extractMarcasAction ($tabela, $tipo)
+    /**
+     * Ação Extrai Marcas
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     *
+     * @return JsonResponse
+     */
+    public function extractMarcasAction($tabelaId, $tipo)
     {
-        return new JsonResponse($this->crawler->extractMarcas($tabela, $tipo), 200);
+        return new JsonResponse($this->crawler->extractMarcas($tabelaId, $tipo), 200);
     }
 
-    public function extractModelosAction ($tabela, $tipo, $marca)
+    /**
+     * Ação Extrai Modelos
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     * @param integer $marcaId  Marca Id
+     *
+     * @return JsonResponse
+     */
+    public function extractModelosAction($tabelaId, $tipo, $marcaId)
     {
-        return new JsonResponse($this->crawler->extractModelos($tabela, $tipo, $marca), 200);
+        return new JsonResponse($this->crawler->extractModelos($tabelaId, $tipo, $marcaId), 200);
     }
 
-    public function extractVeiculosAction ($tabela, $tipo, $marca, $modelo)
+    /**
+     * Ação Extrai Veículos
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     * @param integer $marcaId  Marca Id
+     * @param integer $modeloId Modelo Id
+     *
+     * @return JsonResponse
+     */
+    public function extractVeiculosAction($tabelaId, $tipo, $marcaId, $modeloId)
     {
-        $tmpVeiculos = $this->crawler->extractVeiculos($tabela, $tipo, $marca, $modelo, true);
+        $tmpVeiculos = $this->crawler->extractVeiculos($tabelaId, $tipo, $marcaId, $modeloId, true);
         $this->db->saveVeiculoCompletos($tmpVeiculos);
+
         return new JsonResponse($tmpVeiculos, 200);
     }
 
-    public function extractModelosVeiculosAction ($tabela, $tipo, $marca)
+    /**
+     * Ação Extrai Modelos
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     * @param integer $marcaId  Marca Id
+     *
+     * @return JsonResponse
+     */
+    public function extractModelosVeiculosAction($tabelaId, $tipo, $marcaId)
     {
-        $modelos = $this->crawler->extractModelos($tabela, $tipo, $marca);
+        $modelos = $this->crawler->extractModelos($tabelaId, $tipo, $marcaId);
         $veiculosTotal = 0;
         foreach ($modelos['results'] as $key => $modelo) {
-            $tmpVeiculos = $this->crawler->extractVeiculos($tabela, $tipo, $marca, $modelo, true);
+            $tmpVeiculos = $this->crawler->extractVeiculos($tabelaId, $tipo, $marcaId, $modelo, true);
             $this->db->saveVeiculoCompletos($tmpVeiculos);
             $veiculosTotal += count($tmpVeiculos);
         }
         $modelos['veiculosTotal'] = $veiculosTotal;
+
         return new JsonResponse($modelos, 200);
     }
 
-    public function csvTabelasAction ()
+    /**
+     * Ação CSV Tabelas
+     *
+     * @return JsonResponse
+     */
+    public function csvTabelasAction()
     {
         return new JsonResponse($this->db->findTabelas(), 200);
     }
-    public function csvVeiculosAction ($tabela, $tipo)
+
+    /**
+     * Ação CSV Veículos
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     *
+     * @return JsonResponse
+     */
+    public function csvVeiculosAction($tabelaId, $tipo)
     {
-        return new JsonResponse($this->db->findVeiculosByTabelaAndTipo($tabela, $tipo), 200);
+        return new JsonResponse($this->db->findVeiculosByTabelaAndTipo($tabelaId, $tipo), 200);
     }
 
-    public function error404Action ()
+    /**
+     * Erro 404
+     *
+     * @return JsonResponse
+     */
+    public function error404Action()
     {
         $data = array(
             'error' => true,
-            'msg'   => 'URL não encontrada: ' . $this->request->getUri()
+            'msg'   => 'URL não encontrada: '.$this->request->getUri(),
         );
+
         return new JsonResponse($data, 404);
     }
-
 }

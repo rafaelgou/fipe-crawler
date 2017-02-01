@@ -21,7 +21,11 @@ use Fipe\Crawler;
  * Classe CsvCommand
  * Executa a exportação para CSV
  *
- * @author Rafael Goulart <rafaelgou@gmail.com>
+ * @category Command
+ * @package  Fipe
+ * @author   Rafael Goulart <rafaelgou@gmail.com>
+ * @license  MIT <https://github.com/rafaelgou/fipe-crawler/LICENSE.md>
+ * @link     https://github.com/rafaelgou/fipe-crawler
  */
 class CsvCommand extends ExtrairVeiculoCommand
 {
@@ -30,18 +34,16 @@ class CsvCommand extends ExtrairVeiculoCommand
      */
     protected $db;
 
+    /**
+     * Configuration
+     *
+     * @return void
+     */
     protected function configure()
     {
         parent::configure();
 
-        $help = 'Gera CSV para tabela FIPE informando ano, mês e tipo' . PHP_EOL
-            . 'Somente para dados já extraídos para banco de dados locais' . PHP_EOL
-            . '' . PHP_EOL
-            . 'Sintaxe interativa:' . PHP_EOL
-            . './fipecrawler csv:veiculo' . PHP_EOL
-            . '' . PHP_EOL
-            . 'Sintaxe completa' . PHP_EOL
-            . './fipecrawler csv:veiculo ano mes tipo arquivo' . PHP_EOL;
+        $help = 'Gera CSV para tabela FIPE informando ano, mês e tipo'.PHP_EOL.'Somente para dados já extraídos para banco de dados locais'.PHP_EOL.''.PHP_EOL.'Sintaxe interativa:'.PHP_EOL.'./fipecrawler csv:veiculo'.PHP_EOL.''.PHP_EOL.'Sintaxe completa'.PHP_EOL.'./fipecrawler csv:veiculo ano mes tipo arquivo'.PHP_EOL;
 
 
         $this
@@ -56,6 +58,14 @@ class CsvCommand extends ExtrairVeiculoCommand
         ;
     }
 
+    /**
+     * Interaction
+     *
+     * @param InputInterface  $input  Input
+     * @param OutputInterface $output Output
+     *
+     * @return void
+     */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
         parent::interact($input, $output);
@@ -82,6 +92,14 @@ class CsvCommand extends ExtrairVeiculoCommand
         }
     }
 
+    /**
+     * Execution
+     *
+     * @param InputInterface  $input  Input
+     * @param OutputInterface $output Output
+     *
+     * @return void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $mes  = str_pad($input->getArgument('mes'), 2, '0', STR_PAD_LEFT);
@@ -114,7 +132,7 @@ class CsvCommand extends ExtrairVeiculoCommand
         $progress->start();
         $content = $this->db->getCsvHeader($veiculos[0], true);
         foreach ($veiculos as $veiculo) {
-            $content .= PHP_EOL . $this->db->prepareCsvRow($veiculo, true);
+            $content .= PHP_EOL.$this->db->prepareCsvRow($veiculo, true);
             $progress->advance();
         }
         $progress->finish();
@@ -122,13 +140,11 @@ class CsvCommand extends ExtrairVeiculoCommand
         $output->writeln("");
         $output->writeln("<comment>Exportados $totalVeiculos veículos para $descTabela !</comment>");
 
-        $arquivo = __DIR__ . DIRECTORY_SEPARATOR . $arquivo;
+        $arquivo = __DIR__.DIRECTORY_SEPARATOR.$arquivo;
         $arquivo = str_replace('/src/Fipe/Command', '', $arquivo);
         $output->writeln("<info>Tentando salvar arquivo $arquivo...</info>");
         file_put_contents($arquivo, $content);
         $output->writeln("<comment>Criado arquivo $arquivo !</comment>");
         $output->writeln("");
-
     }
-
 }

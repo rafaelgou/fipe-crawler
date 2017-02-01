@@ -1,7 +1,12 @@
 <?php
 /**
  * Fipe Crawler
- * @author Rafael Goulart <rafaelgou@gmail.com>
+ *
+ * @category Command
+ * @package  Fipe
+ * @author   Rafael Goulart <rafaelgou@gmail.com>
+ * @license  MIT <https://github.com/rafaelgou/fipe-crawler/LICENSE.md>
+ * @link     https://github.com/rafaelgou/fipe-crawler
  */
 
 namespace Fipe\Command;
@@ -22,7 +27,12 @@ use Symfony\Component\Stopwatch\Stopwatch;
  * Classe ExtrairVeiculoCommand
  *
  * Executa a importação de dados do site da FIPE
- * @author Rafael Goulart <rafaelgou@gmail.com>
+ *
+ * @category Command
+ * @package  Fipe
+ * @author   Rafael Goulart <rafaelgou@gmail.com>
+ * @license  MIT <https://github.com/rafaelgou/fipe-crawler/LICENSE.md>
+ * @link     https://github.com/rafaelgou/fipe-crawler
  */
 class ExtrairVeiculoCommand extends Command
 {
@@ -31,15 +41,134 @@ class ExtrairVeiculoCommand extends Command
      */
     protected $db;
 
+    /**
+     * Define banco de dados
+     *
+     * @param Database $db Banco de Dados
+     *
+     * @return void
+     */
+    public function setDb(Database $db)
+    {
+        $this->db = $db;
+    }
+
+    /**
+     * Emite erro fatal
+     *
+     * @param OutputInterface $output Output
+     * @param string          $msg    Mensagem
+     *
+     * @return void
+     */
+    public function fatal(OutputInterface $output, $msg)
+    {
+        $dash  = str_repeat('-', 80);
+        $space = str_repeat(' ', 80);
+        $error = str_pad('** ERRO FATAL **', 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("");
+        $output->writeln("<error>$dash</error>");
+        $output->writeln("<error>$space</error>");
+        $output->writeln("<error>$error</error>");
+        $output->writeln("<error>$space</error>");
+        $msg = str_pad($msg, 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("<error>$msg</error>");
+        $output->writeln("<error>$space</error>");
+        $output->writeln("<error>$dash</error>");
+        exit;
+    }
+
+    /**
+     * Emite alerta
+     *
+     * @param OutputInterface $output Output
+     * @param string          $msg    Mensagem
+     *
+     * @return void
+     */
+    public function alert(OutputInterface $output, $msg)
+    {
+        $dash  = str_repeat('-', 80);
+        $space = str_repeat(' ', 80);
+        $msg = str_pad($msg, 80, ' ', STR_PAD_RIGHT);
+
+        $output->writeln("<question>$dash</question>");
+        $output->writeln("<question>$space</question>");
+        $output->writeln("<question>$msg</question>");
+        $output->writeln("<question>$space</question>");
+        $output->writeln("<question>$dash</question>");
+    }
+
+    /**
+     * Emite banner
+     *
+     * @param OutputInterface $output Output
+     *
+     * @return void
+     */
+    public function banner(OutputInterface $output)
+    {
+        $dash  = str_repeat('-', 80);
+        $space = str_repeat(' ', 80);
+
+        $output->writeln("<question>$dash</question>");
+        $output->writeln("<question>$space</question>");
+
+        $msg = str_pad('  '.$this->getApplication()->getName(), 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("<question>$msg</question>");
+
+        $msg = str_pad('  '.$this->getName(), 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("<question>$msg</question>");
+
+        $msg = str_pad('  '.$this->getDescription(), 80, ' ', STR_PAD_RIGHT);
+        $output->writeln("<question>$msg</question>");
+
+        $output->writeln("<question>$space</question>");
+        $output->writeln("<question>$dash</question>");
+    }
+
+    /**
+     * Seconds to human calc
+     *
+     * @param integer $seconds Seconds
+     *
+     * @return string
+     */
+    public function seconds2human($seconds)
+    {
+        $s = $seconds % 60;
+        $m = floor(($seconds % 3600) / 60);
+        $h = floor(($seconds % 86400) / 3600);
+
+        return "{$h}h{$m}m{$s}s";
+    }
+
+    /**
+     * Memory to human calc
+     *
+     * @param integer $memory Memory in bytes
+     *
+     * @return string
+     */
+    public function memory2human($memory)
+    {
+        if ($memory < 1024) {
+            return $memory." bytes";
+        } elseif ($memory < 1048576) {
+            return round($memory/1024, 2)." kilobytes";
+        } else {
+            return round($memory/1048576, 2)." megabytes";
+        }
+    }
+
+    /**
+     * Configuration
+     *
+     * @return void
+     */
     protected function configure()
     {
-        $help = 'Extrai tabela FIPE informando ano, mês e tipo' . PHP_EOL
-              . '' . PHP_EOL
-              . 'Sintaxe interativa:' . PHP_EOL
-              . './fipecrawler extrair:veiculo' . PHP_EOL
-              . '' . PHP_EOL
-              . 'Sintaxe completa' . PHP_EOL
-              . './fipecrawler extrair:veiculo ano mes tipo' . PHP_EOL;
+        $help = 'Extrai tabela FIPE informando ano, mês e tipo'.PHP_EOL.''.PHP_EOL.'Sintaxe interativa:'.PHP_EOL.'./fipecrawler extrair:veiculo'.PHP_EOL.''.PHP_EOL.'Sintaxe completa'.PHP_EOL.'./fipecrawler extrair:veiculo ano mes tipo'.PHP_EOL;
         $this
             ->setName('veiculo:extrair')
             ->setDescription('Extrai tabela por ano, mês e tipo')
@@ -62,6 +191,14 @@ class ExtrairVeiculoCommand extends Command
         ;
     }
 
+    /**
+     * Interaction
+     *
+     * @param InputInterface  $input  Input
+     * @param OutputInterface $output Output
+     *
+     * @return void
+     */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
         $this->banner($output);
@@ -75,7 +212,7 @@ class ExtrairVeiculoCommand extends Command
                 $anos[$i] = $i;
             }
             $question = new ChoiceQuestion(
-                'Informe ano (ENTER para ' . $date->format('Y') . ')',
+                'Informe ano (ENTER para '.$date->format('Y').')',
                 $anos,
                 $date->format('Y')
             );
@@ -89,7 +226,7 @@ class ExtrairVeiculoCommand extends Command
             }
 
             $question = new ChoiceQuestion(
-                'Informe mês (1 a 12) (ENTER para ' . $date->format('m') . ')',
+                'Informe mês (1 a 12) (ENTER para '.$date->format('m').')',
                 $meses,
                 $date->format('m')
             );
@@ -104,9 +241,16 @@ class ExtrairVeiculoCommand extends Command
             );
             $input->setArgument('tipo', $helper->ask($input, $output, $question));
         }
-
     }
 
+    /**
+     * Execution
+     *
+     * @param InputInterface  $input  Input
+     * @param OutputInterface $output Output
+     *
+     * @return void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stopwatch = new Stopwatch();
@@ -171,8 +315,8 @@ class ExtrairVeiculoCommand extends Command
         $progress->setFormat(" %current%/%max% [%bar%] %ttvei% veículos extraídos");
         $progress->setMessage($totalVeiculos, 'ttvei');
         $progress->start();
-        foreach($modelos as $marcaId => $marcaModelos) {
-            foreach($marcaModelos as $modelo) {
+        foreach ($modelos as $marcaId => $marcaModelos) {
+            foreach ($marcaModelos as $modelo) {
                 $tmpVeiculos  = $crawler->extractVeiculos($tabela['id'], $tipo, $marcaId, $modelo['id'], true);
                 $this->db->saveVeiculoCompletos($tmpVeiculos);
                 $totalVeiculos += $tmpVeiculos['veiculosTotal'];
@@ -194,82 +338,4 @@ class ExtrairVeiculoCommand extends Command
         $output->writeln("<question>FIPE Crawler executado com sucesso!</question>");
         $output->writeln("");
     }
-
-    public function setDb(Database $db)
-    {
-        $this->db = $db;
-    }
-
-    public function fatal(OutputInterface $output, $msg)
-    {
-        $dash  = str_repeat('-', 80);
-        $space = str_repeat(' ', 80);
-        $error = str_pad('** ERRO FATAL **', 80, ' ', STR_PAD_RIGHT);
-        $output->writeln("");
-        $output->writeln("<error>$dash</error>");
-        $output->writeln("<error>$space</error>");
-        $output->writeln("<error>$error</error>");
-        $output->writeln("<error>$space</error>");
-        $msg = str_pad($msg, 80, ' ', STR_PAD_RIGHT);
-        $output->writeln("<error>$msg</error>");
-        $output->writeln("<error>$space</error>");
-        $output->writeln("<error>$dash</error>");
-        exit;
-    }
-
-    public function alert(OutputInterface $output, $msg)
-    {
-        $dash  = str_repeat('-', 80);
-        $space = str_repeat(' ', 80);
-        $msg = str_pad($msg, 80, ' ', STR_PAD_RIGHT);
-
-        $output->writeln("<question>$dash</question>");
-        $output->writeln("<question>$space</question>");
-        $output->writeln("<question>$msg</question>");
-        $output->writeln("<question>$space</question>");
-        $output->writeln("<question>$dash</question>");
-
-    }
-    public function banner(OutputInterface $output)
-    {
-        $dash  = str_repeat('-', 80);
-        $space = str_repeat(' ', 80);
-
-        $output->writeln("<question>$dash</question>");
-        $output->writeln("<question>$space</question>");
-
-        $msg = str_pad('  ' . $this->getApplication()->getName(), 80, ' ', STR_PAD_RIGHT);
-        $output->writeln("<question>$msg</question>");
-
-        $msg = str_pad('  ' . $this->getName(), 80, ' ', STR_PAD_RIGHT);
-        $output->writeln("<question>$msg</question>");
-
-        $msg = str_pad('  ' . $this->getDescription(), 80, ' ', STR_PAD_RIGHT);
-        $output->writeln("<question>$msg</question>");
-
-        $output->writeln("<question>$space</question>");
-        $output->writeln("<question>$dash</question>");
-    }
-
-    public function seconds2human($seconds)
-    {
-        $s = $seconds % 60;
-        $m = floor(($seconds % 3600) / 60);
-        $h = floor(($seconds % 86400) / 3600);
-
-        return "{$h}h{$m}m{$s}s";
-    }
-
-    public function memory2human($memory)
-    {
-        if ($memory < 1024) {
-            return $memory . " bytes";
-        } elseif ($memory < 1048576) {
-            return round($memory/1024,2)." kilobytes";
-        } else {
-            return round($memory/1048576,2)." megabytes";
-        }
-
-    }
-
 }
