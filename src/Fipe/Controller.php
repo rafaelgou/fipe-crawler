@@ -1,4 +1,8 @@
 <?php
+/**
+ * Fipe Crawler
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 
 namespace Fipe;
 
@@ -7,6 +11,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Stopwatch\Stopwatch;
 
+/**
+ * Classe Controller
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 class Controller
 {
     /**

@@ -1,4 +1,8 @@
 <?php
+/**
+ * Fipe Crawler
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 
 namespace Fipe\Command;
 
@@ -14,6 +18,12 @@ use Fipe\Database;
 use Fipe\Crawler;
 use Symfony\Component\Stopwatch\Stopwatch;
 
+/**
+ * Classe ExtrairVeiculoCommand
+ *
+ * Executa a importação de dados do site da FIPE
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 class ExtrairVeiculoCommand extends Command
 {
     /**

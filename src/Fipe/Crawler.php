@@ -1,12 +1,25 @@
 <?php
+/**
+ * Fipe Crawler
+ *
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 
 namespace Fipe;
 
 use Symfony\Component\DomCrawler\Crawler as DomCrawler;
 use Symfony\Component\Stopwatch\Stopwatch;
 
+/**
+ * Classe Crawler
+ *
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 class Crawler {
 
+    /**
+     * @var array
+     */
     static $urls = array(
         'tabelas'    => 'http://www.fipe.org.br/pt-br/indices/veiculos',
         'marcas'     => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarMarcas',
@@ -15,12 +28,18 @@ class Crawler {
         'veiculo'    => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarValorComTodosParametros',
     );
 
+    /**
+     * @var array
+     */
     static $tipoVeiculos = array(
         1 => 'carro',
         2 => 'moto',
         3 => 'caminhao'
     );
 
+    /**
+     * @var array
+     */
     static $tipoVeiculosFull = array(
         1 => 'Carro',
         2 => 'Moto',
@@ -33,11 +52,21 @@ class Crawler {
      */
     protected $stopwatch = null;
 
+    /**
+     * Construtor
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->stopwatch = new Stopwatch();
     }
 
+    /**
+     * Recupera tabelas
+     *
+     * @return array
+     */
     public function getTabelas()
     {
         $crawler = new DomCrawler();
@@ -54,13 +83,18 @@ class Crawler {
         return $tabelas;
     }
 
+    /**
+     * Recupera tabela por ano e mês
+     *
+     * @param string $ano Ano
+     * @param string $mes Mês
+     *
+     * @return
+     */
     public function getTabelaByAnoMes($ano, $mes)
     {
         $tabelas = $this->extractTabelas();
         foreach ($tabelas['results'] as $tabela) {
-            if (!array_key_exists('ano', $tabela)) {
-                print_r($tabela);
-            }
             $comparar = $tabela['ano'] . $tabela['mes'];
             if ($comparar === $ano . $mes) {
                 return $tabela;

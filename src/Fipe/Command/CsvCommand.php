@@ -1,4 +1,8 @@
 <?php
+/**
+ * Fipe Crawler
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 
 namespace Fipe\Command;
 
@@ -13,6 +17,12 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Fipe\Database;
 use Fipe\Crawler;
 
+/**
+ * Classe CsvCommand
+ * Executa a exportação para CSV
+ *
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 class CsvCommand extends ExtrairVeiculoCommand
 {
     /**

@@ -1,4 +1,8 @@
 <?php
+/**
+ * Fipe Crawler
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 
 namespace Fipe\Command;
 
@@ -13,6 +17,13 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Fipe\Database;
 use Fipe\Crawler;
 
+/**
+ * Classe JavascriptCommand
+ *
+ * Concatena dependências em um único arquivo
+ * @deprecated (melhor utilizar gulp/grunt ou similar para isto)
+ * @author Rafael Goulart <rafaelgou@gmail.com>
+ */
 class JavascriptCommand extends Command
 {
     /**
