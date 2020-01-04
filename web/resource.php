@@ -9,10 +9,10 @@ $request    = Request::createFromGlobals();
 $db         = new Fipe\Database($db['host'], $db['dbname'], $db['user'], $db['pass']);
 $controller = new Controller($request, $db);
 $action     = $request->get('action', '404');
-$tabela = $request->get('tabela', null);
-$tipo   = $request->get('tipo', null);
-$marca  = $request->get('marca', null);
-$modelo = $request->get('modelo', null);
+$tabelaId   = $request->get('tabela', null);
+$tipo       = $request->get('tipo', null);
+$marcaId    = $request->get('marca', null);
+$modeloId   = $request->get('modelo', null);
 
 
 switch ($action) {
@@ -26,19 +26,19 @@ switch ($action) {
         break;
 
     case 'extract_marcas':
-        $response = $controller->extractMarcasAction($tabela, $tipo);
+        $response = $controller->extractMarcasAction($tabelaId, $tipo);
         break;
 
     case 'extract_modelos':
-        $response = $controller->extractModelosAction($tabela, $tipo, $marca);
+        $response = $controller->extractModelosAction($tabelaId, $tipo, $marcaId);
         break;
 
     case 'extract_veiculos':
-        $response = $controller->extractVeiculosAction($tabela, $tipo, $marca, $modelo);
+        $response = $controller->extractVeiculosAction($tabelaId, $tipo, $marcaId, $modeloId);
         break;
 
     case 'extract_modelos_veiculos':
-        $response = $controller->extractModelosVeiculosAction($tabela, $tipo, $marca);
+        $response = $controller->extractModelosVeiculosAction($tabelaId, $tipo, $marcaId);
         break;
 
     case 'csv_tabelas':
@@ -46,7 +46,7 @@ switch ($action) {
         break;
 
     case 'csv_veiculos':
-        $response = $controller->csvVeiculosAction($tabela, $tipo);
+        $response = $controller->csvVeiculosAction($tabelaId, $tipo);
         break;
 
     default:

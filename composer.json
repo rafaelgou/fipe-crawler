@@ -13,7 +13,9 @@
         "psr-0": { "Fipe\\": "src/" }
     },
     "scripts": {
-      "test": "./vendor/phpunit/phpunit/phpunit src/"
+      "test": "./vendor/phpunit/phpunit/phpunit src/",
+      "phpcs": "phpcs --standard=Symfony2 src/",
+      "phpcbf": "phpcs --standard=Symfony2 src/"
     },
     "minimum-stability": "dev",
     "target-dir": ""

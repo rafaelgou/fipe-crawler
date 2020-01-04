@@ -1,13 +1,35 @@
 <?php
+/**
+ * Fipe Crawler
+ *
+ * @category Crawler
+ * @package  Fipe
+ * @author   Rafael Goulart <rafaelgou@gmail.com>
+ * @license  MIT <https://github.com/rafaelgou/fipe-crawler/LICENSE.md>
+ * @link     https://github.com/rafaelgou/fipe-crawler
+ */
 
 namespace Fipe;
 
 use Symfony\Component\DomCrawler\Crawler as DomCrawler;
 use Symfony\Component\Stopwatch\Stopwatch;
 
-class Crawler {
+/**
+ * Classe Crawler
+ *
+ * @category Crawler
+ * @package  Fipe
+ * @author   Rafael Goulart <rafaelgou@gmail.com>
+ * @license  MIT <https://github.com/rafaelgou/fipe-crawler/LICENSE.md>
+ * @link     https://github.com/rafaelgou/fipe-crawler
+ */
+class Crawler
+{
 
-    static $urls = array(
+    /**
+     * @var array
+     */
+    public static $urls = array(
         'tabelas'    => 'http://www.fipe.org.br/pt-br/indices/veiculos',
         'marcas'     => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarMarcas',
         'modelos'    => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarModelos',
@@ -15,13 +37,19 @@ class Crawler {
         'veiculo'    => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarValorComTodosParametros',
     );
 
-    static $tipoVeiculos = array(
+    /**
+     * @var array
+     */
+    public static $tipos = array(
         1 => 'carro',
         2 => 'moto',
-        3 => 'caminhao'
+        3 => 'caminhao',
     );
 
-    static $tipoVeiculosFull = array(
+    /**
+     * @var array
+     */
+    public static $tiposFull = array(
         1 => 'Carro',
         2 => 'Moto',
         3 => 'Caminhão',
@@ -33,11 +61,21 @@ class Crawler {
      */
     protected $stopwatch = null;
 
+    /**
+     * Construtor
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->stopwatch = new Stopwatch();
     }
 
+    /**
+     * Recupera tabelas
+     *
+     * @return array
+     */
     public function getTabelas()
     {
         $crawler = new DomCrawler();
@@ -47,22 +85,27 @@ class Crawler {
 
         $tabelas = array();
         $options = $crawler->filter('select#selectTabelaReferenciacarro')->children();
-        foreach($options as $option) {
+        foreach ($options as $option) {
             $tabelas[$option->getAttribute('value')] = $option->nodeValue;
         }
 
         return $tabelas;
     }
 
+    /**
+     * Recupera tabela por ano e mês
+     *
+     * @param string $ano Ano
+     * @param string $mes Mês
+     *
+     * @return string|null
+     */
     public function getTabelaByAnoMes($ano, $mes)
     {
         $tabelas = $this->extractTabelas();
         foreach ($tabelas['results'] as $tabela) {
-            if (!array_key_exists('ano', $tabela)) {
-                print_r($tabela);
-            }
-            $comparar = $tabela['ano'] . $tabela['mes'];
-            if ($comparar === $ano . $mes) {
+            $comparar = $tabela['ano'].$tabela['mes'];
+            if ($comparar === $ano.$mes) {
                 return $tabela;
             }
         }
@@ -70,29 +113,46 @@ class Crawler {
         return null;
     }
 
-    public function getMarcas($tabela, $tipoVeiculo)
+    /**
+     * Recupera marcas
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     *
+     * @return array
+     */
+    public function getMarcas($tabelaId, $tipo)
     {
         $params = array(
-            'codigoTabelaReferencia' => $tabela,
-            'codigoTipoVeiculo'      => $tipoVeiculo,
+            'codigoTabelaReferencia' => $tabelaId,
+            'codigoTipoVeiculo'      => $tipo,
         );
         $url     = self::$urls['marcas'];
         $tmp     = json_decode($this->httpPost($url, $params));
         $records = array();
-        foreach($tmp as $t) {
+        foreach ($tmp as $t) {
             $records[$t->Value] = $t->Label;
         }
 
         return $records;
     }
 
-    public function getModelos($tabela, $tipoVeiculo, $marca)
+    /**
+     * Recupera modelos
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     * @param integer $marcaId  Marca Id
+     *
+     * @return array
+     */
+    public function getModelos($tabelaId, $tipo, $marcaId)
     {
         $params = array(
-            'codigoTipoVeiculo'      => $tipoVeiculo,
-            'codigoTabelaReferencia' => $tabela,
+            'codigoTipoVeiculo'      => $tipo,
+            'codigoTabelaReferencia' => $tabelaId,
             'codigoModelo'           => '',
-            'codigoMarca'            => $marca,
+            'codigoMarca'            => $marcaId,
             'ano'                    => '',
             'codigoTipoCombustivel'  => '',
             'anoModelo'              => '',
@@ -101,21 +161,30 @@ class Crawler {
         $url     = self::$urls['modelos'];
         $tmp     = json_decode($this->httpPost($url, $params));
         $records = array();
-        foreach($tmp->Modelos as $t) {
+        foreach ($tmp->Modelos as $t) {
             $records[$t->Value] = $t->Label;
         }
 
         return $records;
     }
 
-    public function getAnoModelos($tabela, $tipoVeiculo, $marca, $modelo)
+    /**
+     * Recupera ano modelos
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     * @param integer $marcaId  Marca Id
+     * @param integer $modeloId Modelo Id
+     *
+     * @return array
+     */
+    public function getAnoModelos($tabelaId, $tipo, $marcaId, $modeloId)
     {
-
         $params = array(
-            'codigoTipoVeiculo'      => $tipoVeiculo,
-            'codigoTabelaReferencia' => $tabela,
-            'codigoModelo'           => $modelo,
-            'codigoMarca'            => $marca,
+            'codigoTipoVeiculo'      => $tipo,
+            'codigoTabelaReferencia' => $tabelaId,
+            'codigoModelo'           => $modeloId,
+            'codigoMarca'            => $marcaId,
             'ano'                    => '',
             'codigoTipoCombustivel'  => '',
             'anoModelo'              => '',
@@ -124,24 +193,36 @@ class Crawler {
         $url     = self::$urls['anoModelos'];
         $tmp     = json_decode($this->httpPost($url, $params));
         $records = array();
-        foreach($tmp as $t) {
+        foreach ($tmp as $t) {
             $records[$t->Value] = $t->Label;
         }
 
         return $records;
     }
 
-    public function getVeiculo($tabela, $tipo, $marca, $modelo, $combustivel, $ano)
+    /**
+     * Recupera veículo
+     *
+     * @param integer $tabelaId    Tabela Id
+     * @param integer $tipo        Tipo
+     * @param integer $marcaId     Marca Id
+     * @param integer $modeloId    Modelo Id
+     * @param string  $combustivel Código combustível
+     * @param intege  $ano         Ano Modelo
+     *
+     * @return array
+     */
+    public function getVeiculo($tabelaId, $tipo, $marcaId, $modeloId, $combustivel, $ano)
     {
         $params = array(
             'codigoTipoVeiculo'      => $tipo,
-            'codigoTabelaReferencia' => $tabela,
-            'codigoModelo'           => $modelo,
-            'codigoMarca'            => $marca,
+            'codigoTabelaReferencia' => $tabelaId,
+            'codigoModelo'           => $modeloId,
+            'codigoMarca'            => $marcaId,
             'codigoTipoCombustivel'  => $combustivel,
             'anoModelo'              => $ano,
             'modeloCodigoExterno'    => '',
-            'tipoVeiculo'            => self::$tipoVeiculos[$tipo],
+            'tipoVeiculo'            => self::$tipos[$tipo],
             'tipoConsulta'           => 'tradicional',
         );
         $url    = self::$urls['veiculo'];
@@ -150,37 +231,68 @@ class Crawler {
         return get_object_vars($record);
     }
 
+    /**
+     * Extrai veículos
+     *
+     * @param string $url    URL para request
+     * @param array  $params Parâmetros
+     *
+     * @return string
+     */
     public function httpPost($url, $params)
     {
-        foreach($params as $k => $v)
-        {
-          $params[$k] = $k . '=' .$v;
+        foreach ($params as $k => $v) {
+            $params[$k] = $k.'='.$v;
         }
         $postData = implode('&', $params);
         $ch = curl_init();
 
-        curl_setopt($ch,CURLOPT_URL, $url);
-        curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-        curl_setopt($ch,CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_POST, count($postData));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Accept:application/json, text/javascript, */*; q=0.01',
+                'Accept-Encoding:gzip, deflate',
+                'Accept-Language:pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4',
+                'Connection:keep-alive',
+                'Content-Type:application/x-www-form-urlencoded; charset=UTF-8',
+                'Cookie:_ga=GA1.3.472052299.1466616166; _gat=1',
+                'Host:veiculos.fipe.org.br',
+                'Origin:http://veiculos.fipe.org.br',
+                'Referer:http://veiculos.fipe.org.br/',
+                'User-Agent:Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
+                'X-Requested-With:XMLHttpRequest',
+        ));
 
-        $output=curl_exec($ch);
+        $output = curl_exec($ch);
         curl_close($ch);
 
         return $output;
     }
 
-    public function getVeiculos($tabela, $tipoVeiculo)
+    /**
+     * Recupera veículos
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     *
+     * @return array
+     */
+    public function getVeiculos($tabelaId, $tipo)
     {
         $veiculos = array();
 
-        $marcas = $this->getMarcas($tabela, $tipoVeiculo);
+        $marcas = $this->getMarcas($tabelaId, $tipo);
         foreach ($marcas as $marca) {
-            $modelos = $this->getModelos($tabela, $tipoVeiculo, $marca->Value);
+            $modelos = $this->getModelos($tabelaId, $tipo, $marca->Value);
             foreach ($modelos as $modelo) {
                 $anoModelos = $this->getAnoModelos(
-                    $tabela, $tipoVeiculo, $marca->Value, $modelo->Value
+                    $tabelaId,
+                    $tipo,
+                    $marca->Value,
+                    $modelo->Value
                 );
 
                 foreach ($anoModelos as $anoModelo) {
@@ -188,8 +300,12 @@ class Crawler {
                     $ano         = $tmpValue[0];
                     $combustivel = $tmpValue[1];
                     $veiculos[] = $this->getVeiculo(
-                        $tabela, $tipoVeiculo, $marca->Value,
-                        $modelo->Value, $combustivel, $ano
+                        $tabelaId,
+                        $tipo,
+                        $marca->Value,
+                        $modelo->Value,
+                        $combustivel,
+                        $ano
                     );
                 }
             }
@@ -198,13 +314,17 @@ class Crawler {
         return $veiculos;
     }
 
+    /**
+     * Extrai tabelas
+     *
+     * @return array
+     */
     public function extractTabelas()
     {
         $this->stopwatch->start('progress');
         $tabelas = $this->getTabelas();
         $results = array();
         foreach ($tabelas as $id => $tabela) {
-
             $tmp = explode('/', $tabela);
             $results[] = array(
                 'id'  => $id,
@@ -223,10 +343,18 @@ class Crawler {
         return $data;
     }
 
-    public function extractMarcas ($tabela, $tipo)
+    /**
+     * Extrai marcas
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     *
+     * @return array
+     */
+    public function extractMarcas($tabelaId, $tipo)
     {
         $this->stopwatch->start('progress');
-        $marcas  = $this->getMarcas($tabela, $tipo);
+        $marcas  = $this->getMarcas($tabelaId, $tipo);
         $results = array();
         foreach ($marcas as $id => $marca) {
             $results[] = array(
@@ -247,10 +375,19 @@ class Crawler {
         return $data;
     }
 
-    public function extractModelos ($tabela, $tipo, $marca)
+    /**
+     * Extrai modelos
+     *
+     * @param integer $tabelaId Tabela Id
+     * @param integer $tipo     Tipo
+     * @param integer $marcaId  Marca Id
+     *
+     * @return array
+     */
+    public function extractModelos($tabelaId, $tipo, $marcaId)
     {
         $this->stopwatch->start('progress');
-        $modelos = $this->getModelos($tabela, $tipo, $marca);
+        $modelos = $this->getModelos($tabelaId, $tipo, $marcaId);
         $results = array();
         foreach ($modelos as $id => $modelo) {
             $results[] = array(
@@ -270,12 +407,26 @@ class Crawler {
         return $data;
     }
 
-    public function extractVeiculos ($tabela, $tipo, $marca, $modelo, $getResult = false)
+    /**
+     * Extrai veículos
+     *
+     * @param integer $tabelaId  Tabela Id
+     * @param integer $tipo      Tipo
+     * @param integer $marcaId   Marca Id
+     * @param integer $modeloId  Modelo Id
+     * @param boolean $getResult Recuperar ou não resultados
+     *
+     * @return array
+     */
+    public function extractVeiculos($tabelaId, $tipo, $marcaId, $modeloId, $getResult = false)
     {
         $this->stopwatch->start('progress');
         $results = array();
         $anoModelos = $this->getAnoModelos(
-            $tabela, $tipo, $marca, $modelo
+            $tabelaId,
+            $tipo,
+            $marcaId,
+            $modeloId
         );
         foreach ($anoModelos as $id => $anoModelo) {
             $tmpValue = explode('-', $id);
@@ -288,7 +439,12 @@ class Crawler {
                 'ano'  => $ano,
             );
             $veiculo = $this->getVeiculo(
-                $tabela, $tipo, $marca, $modelo, $comb, $ano
+                $tabelaId,
+                $tipo,
+                $marcaId,
+                $modeloId,
+                $comb,
+                $ano
             );
             $valor = $veiculo['Valor'];
             $valor = str_replace('R$ ', '', $valor);
@@ -301,14 +457,14 @@ class Crawler {
             $anoref = trim($tmpMes[2]);
 
             $results[] = array(
-                'tabela_id'  => $tabela,
+                'tabela_id'  => $tabelaId,
                 'anoref'     => $anoref,
                 'mesref'     => $mesref,
                 'tipo'       => $tipo,
                 'fipe_cod'   => trim($veiculo['CodigoFipe']),
-                'marca_id'   => $marca,
+                'marca_id'   => $marcaId,
                 'marca'      => trim($veiculo['Marca']),
-                'modelo_id'  => $modelo,
+                'modelo_id'  => $modeloId,
                 'modelo'     => trim($veiculo['Modelo']),
                 'anomod'     => trim($veiculo['AnoModelo']),
                 'comb_cod'   => $comb,
@@ -331,6 +487,4 @@ class Crawler {
 
         return $data;
     }
-
-
 }
