@@ -1,5 +1,7 @@
 # FIPE Crawler
 
+**[DEPRECATED]**: A Fipe mudou o modo de requisição, invalidando a ferramenta.
+
 Script que realiza download dos dados da [Tabela FIPE Preço Médio de Veículos](http://veiculos.fipe.org.br/).
 
 ## Instalação
