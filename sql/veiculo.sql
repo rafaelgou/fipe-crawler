@@ -1,3 +1,7 @@
+DROP DATABASE IF EXISTS `fipe`;
+CREATE DATABASE IF NOT EXISTS `fipe` CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `fipe`;
+
 SET NAMES utf8;
 SET time_zone = '+00:00';
 SET foreign_key_checks = 0;

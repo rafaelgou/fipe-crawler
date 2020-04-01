@@ -30,11 +30,12 @@ class Crawler
      * @var array
      */
     public static $urls = array(
-        'tabelas'    => 'http://www.fipe.org.br/pt-br/indices/veiculos',
-        'marcas'     => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarMarcas',
-        'modelos'    => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarModelos',
-        'anoModelos' => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarAnoModelo',
-        'veiculo'    => 'http://veiculos.fipe.org.br/api/veiculos/ConsultarValorComTodosParametros',
+        // 'tabelas'    => 'https://veiculos.fipe.org.br',
+        'tabelas'    => 'https://veiculos.fipe.org.br/api/veiculos/ConsultarTabelaDeReferencia',
+        'marcas'     => 'https://veiculos.fipe.org.br/api/veiculos/ConsultarMarcas',
+        'modelos'    => 'https://veiculos.fipe.org.br/api/veiculos/ConsultarModelos',
+        'anoModelos' => 'https://veiculos.fipe.org.br/api/veiculos/ConsultarAnoModelo',
+        'veiculo'    => 'https://veiculos.fipe.org.br/api/veiculos/ConsultarValorComTodosParametros',
     );
 
     /**
@@ -78,15 +79,44 @@ class Crawler
      */
     public function getTabelas()
     {
-        $crawler = new DomCrawler();
-        $html = file_get_contents(self::$urls['tabelas']);
-        $html = mb_convert_encoding($html, 'HTML-ENTITIES', "UTF-8");
-        $crawler->addContent($html);
+        // send the request
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, self::$urls['tabelas']);
+        curl_setopt($curl, CURLOPT_FAILONERROR, TRUE);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Accept: application/json, text/javascript, */*; q=0.01',
+            'Origin: https://veiculos.fipe.org.br',
+            'Referer: https://veiculos.fipe.org.br/',
+            'Accept-Language: pt-br',
+            'Host: veiculos.fipe.org.br',
+            'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1 Safari/605.1.15',
+            'Content-Length: 0',
+            'Connection: keep-alive'
+            ));
+        curl_setopt($curl, CURLINFO_HEADER_OUT, TRUE);
+        curl_setopt($curl, CURLOPT_POST, TRUE);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+        // case the request fails set the error
+        if (!$resultado_curl = curl_exec($curl))
+        {
+            curl_close($curl);
+            return FALSE;
+        }
+
+        curl_close($curl);
+
+        if (!$tabela_curl = json_decode($resultado_curl))
+        {
+            return FALSE;
+        }
 
         $tabelas = array();
-        $options = $crawler->filter('select#selectTabelaReferenciacarro')->children();
-        foreach ($options as $option) {
-            $tabelas[$option->getAttribute('value')] = $option->nodeValue;
+        foreach ($tabela_curl as $linha)
+        {
+            $tabelas[$linha->Codigo] = $linha->Mes;
         }
 
         return $tabelas;
@@ -190,11 +220,17 @@ class Crawler
             'anoModelo'              => '',
             'modeloCodigoExterno'    => '',
         );
+
         $url     = self::$urls['anoModelos'];
         $tmp     = json_decode($this->httpPost($url, $params));
         $records = array();
-        foreach ($tmp as $t) {
-            $records[$t->Value] = $t->Label;
+
+        if (is_array($tmp) || is_object($tmp))
+        {
+            foreach ($tmp as $t)
+            {
+                $records[$t->Value] = $t->Label;
+            }
         }
 
         return $records;
@@ -228,7 +264,7 @@ class Crawler
         $url    = self::$urls['veiculo'];
         $record = json_decode($this->httpPost($url, $params));
 
-        return get_object_vars($record);
+        return empty($record) ? NULL : get_object_vars($record);
     }
 
     /**
@@ -241,30 +277,27 @@ class Crawler
      */
     public function httpPost($url, $params)
     {
-        foreach ($params as $k => $v) {
-            $params[$k] = $k.'='.$v;
-        }
-        $postData = implode('&', $params);
+        $postData = http_build_query($params, '', '&');
+
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_POST, count($postData));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_POST, TRUE);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
                 'Accept:application/json, text/javascript, */*; q=0.01',
-                'Accept-Encoding:gzip, deflate',
                 'Accept-Language:pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4',
                 'Connection:keep-alive',
                 'Content-Type:application/x-www-form-urlencoded; charset=UTF-8',
-                'Cookie:_ga=GA1.3.472052299.1466616166; _gat=1',
                 'Host:veiculos.fipe.org.br',
                 'Origin:http://veiculos.fipe.org.br',
                 'Referer:http://veiculos.fipe.org.br/',
-                'User-Agent:Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
+                'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1 Safari/605.1.15',
                 'X-Requested-With:XMLHttpRequest',
-        ));
+         ));
+        curl_setopt($ch, CURLINFO_HEADER_OUT, TRUE);
 
         $output = curl_exec($ch);
         curl_close($ch);
@@ -438,14 +471,18 @@ class Crawler
                 'comb' => $comb,
                 'ano'  => $ano,
             );
-            $veiculo = $this->getVeiculo(
+
+            if (!$veiculo = $this->getVeiculo(
                 $tabelaId,
                 $tipo,
                 $marcaId,
                 $modeloId,
                 $comb,
                 $ano
-            );
+            ))
+            {
+                continue;
+            }
             $valor = $veiculo['Valor'];
             $valor = str_replace('R$ ', '', $valor);
             $valor = str_replace('.', '', $valor);
@@ -453,8 +490,8 @@ class Crawler
             $valor = (int) $valor;
 
             $tmpMes = explode(' ', $veiculo['MesReferencia']);
-            $mesref = Database::$meses[$tmpMes[0]];
-            $anoref = trim($tmpMes[2]);
+            $mesref = isset($tmpMes[0]) ? Database::$meses[$tmpMes[0]] : '';
+            $anoref = isset($tmpMes[2]) ? trim($tmpMes[2]) : '';
 
             $results[] = array(
                 'tabela_id'  => $tabelaId,
