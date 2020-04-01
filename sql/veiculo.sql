@@ -1,10 +1,14 @@
+DROP DATABASE IF EXISTS `fipe`;
+CREATE DATABASE IF NOT EXISTS `fipe` CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `fipe`;
+
 SET NAMES utf8;
 SET time_zone = '+00:00';
 SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 DROP TABLE IF EXISTS `veiculo`;
-CREATE TABLE `veiculo_completo` (
+CREATE TABLE `veiculo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fipe_cod` varchar(10) DEFAULT NULL,
   `tabela_id` int(11) NOT NULL,

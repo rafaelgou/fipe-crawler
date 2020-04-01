@@ -297,7 +297,7 @@ class Database
     {
         $results = array();
 
-        $sql = "INSERT INTO veiculo_completo (fipe_cod, tabela_id, anoref, mesref, tipo, marca_id, marca, modelo_id, modelo, anomod, comb_cod, comb_sigla, comb, valor) "."VALUES (:fipe_cod, :tabela_id, :anoref, :mesref, :tipo, :marca_id, :marca, :modelo_id, :modelo, :anomod, :comb_cod,:comb_sigla, :comb, :valor);";
+        $sql = "INSERT INTO veiculo (fipe_cod, tabela_id, anoref, mesref, tipo, marca_id, marca, modelo_id, modelo, anomod, comb_cod, comb_sigla, comb, valor) "."VALUES (:fipe_cod, :tabela_id, :anoref, :mesref, :tipo, :marca_id, :marca, :modelo_id, :modelo, :anomod, :comb_cod,:comb_sigla, :comb, :valor);";
         $stmt = $this->conn->prepare(
             $sql,
             array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY)
@@ -327,7 +327,7 @@ class Database
      */
     public function findVeiculos($anoref, $mesref, $tipo)
     {
-        $sql = "SELECT * FROM veiculo_completo "." WHERE anoref = :anoref AND mesref = :mesref AND tipo = :tipo;";
+        $sql = "SELECT * FROM veiculo "." WHERE anoref = :anoref AND mesref = :mesref AND tipo = :tipo;";
         $stmt = $this->conn->prepare(
             $sql,
             array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY)
@@ -402,7 +402,7 @@ class Database
      */
     public function findTabelas()
     {
-        $sql = "SELECT DISTINCT tabela_id, anoref, mesref, tipo FROM veiculo_completo ORDER BY anoref DESC, mesref DESC, tipo";
+        $sql = "SELECT DISTINCT tabela_id, anoref, mesref, tipo FROM veiculo ORDER BY anoref DESC, mesref DESC, tipo";
         $stmt = $this->conn->prepare($sql, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY));
         $stmt->execute();
         $tabelasResult = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -430,7 +430,7 @@ class Database
      */
     public function findVeiculosByTabelaAndTipo($tabela, $tipo)
     {
-        $sql = "SELECT * FROM veiculo_completo WHERE tabela_id = :tabela_id AND tipo = :tipo";
+        $sql = "SELECT * FROM veiculo WHERE tabela_id = :tabela_id AND tipo = :tipo";
         $stmt = $this->conn->prepare(
             $sql,
             array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY)

@@ -1,7 +1,5 @@
 # FIPE Crawler
 
-**[DEPRECATED]**: A Fipe mudou o modo de requisição, invalidando a ferramenta.
-
 Script que realiza download dos dados da [Tabela FIPE Preço Médio de Veículos](http://veiculos.fipe.org.br/).
 
 Licensa: [MIT](LICENSE.md)
@@ -293,5 +291,5 @@ SELECT * FROM veiculo WHERE tipo = 1;
 *   Lista de combustíveis
 
 ```sql
-SELECT DISTINCT comb_sigla, comb FROM veiculo_completo ORDER BY comb_sigla, comb;
+SELECT DISTINCT comb_sigla, comb FROM veiculo ORDER BY comb_sigla, comb;
 ```
