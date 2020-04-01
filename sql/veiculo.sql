@@ -8,7 +8,7 @@ SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 DROP TABLE IF EXISTS `veiculo`;
-CREATE TABLE `veiculo_completo` (
+CREATE TABLE `veiculo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fipe_cod` varchar(10) DEFAULT NULL,
   `tabela_id` int(11) NOT NULL,

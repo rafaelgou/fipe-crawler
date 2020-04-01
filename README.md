@@ -291,5 +291,5 @@ SELECT * FROM veiculo WHERE tipo = 1;
 *   Lista de combustíveis
 
 ```sql
-SELECT DISTINCT comb_sigla, comb FROM veiculo_completo ORDER BY comb_sigla, comb;
+SELECT DISTINCT comb_sigla, comb FROM veiculo ORDER BY comb_sigla, comb;
 ```
