@@ -30,7 +30,6 @@ class Crawler
      * @var array
      */
     public static $urls = array(
-        // 'tabelas'    => 'https://veiculos.fipe.org.br',
         'tabelas'    => 'https://veiculos.fipe.org.br/api/veiculos/ConsultarTabelaDeReferencia',
         'marcas'     => 'https://veiculos.fipe.org.br/api/veiculos/ConsultarMarcas',
         'modelos'    => 'https://veiculos.fipe.org.br/api/veiculos/ConsultarModelos',
@@ -83,7 +82,7 @@ class Crawler
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, self::$urls['tabelas']);
         curl_setopt($curl, CURLOPT_FAILONERROR, TRUE);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 5);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
             'Accept: application/json, text/javascript, */*; q=0.01',
@@ -93,7 +92,8 @@ class Crawler
             'Host: veiculos.fipe.org.br',
             'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1 Safari/605.1.15',
             'Content-Length: 0',
-            'Connection: keep-alive'
+            'Connection: keep-alive',
+            'X-Requested-With: XMLHttpRequest'
             ));
         curl_setopt($curl, CURLINFO_HEADER_OUT, TRUE);
         curl_setopt($curl, CURLOPT_POST, TRUE);
@@ -105,7 +105,6 @@ class Crawler
             curl_close($curl);
             return FALSE;
         }
-
         curl_close($curl);
 
         if (!$tabela_curl = json_decode($resultado_curl))
@@ -132,10 +131,16 @@ class Crawler
      */
     public function getTabelaByAnoMes($ano, $mes)
     {
-        $tabelas = $this->extractTabelas();
-        foreach ($tabelas['results'] as $tabela) {
+        if (!$tabelas = $this->extractTabelas())
+        {
+            return NULL;
+        }
+
+        foreach ($tabelas['results'] as $tabela)
+        {
             $comparar = $tabela['ano'].$tabela['mes'];
-            if ($comparar === $ano.$mes) {
+            if ($comparar === $ano.$mes)
+            {
                 return $tabela;
             }
         }
@@ -355,9 +360,14 @@ class Crawler
     public function extractTabelas()
     {
         $this->stopwatch->start('progress');
-        $tabelas = $this->getTabelas();
+        if (!$tabelas = $this->getTabelas())
+        {
+            return NULL;
+        }
         $results = array();
-        foreach ($tabelas as $id => $tabela) {
+
+        foreach ($tabelas as $id => $tabela)
+        {
             $tmp = explode('/', $tabela);
             $results[] = array(
                 'id'  => $id,
@@ -366,7 +376,9 @@ class Crawler
                 'mes' => trim(Database::$meses[$tmp[0]]),
             );
         }
+
         $event = $this->stopwatch->stop('progress');
+
         $data = array(
             'results'  => $results,
             'duration' => $event->getDuration(),
