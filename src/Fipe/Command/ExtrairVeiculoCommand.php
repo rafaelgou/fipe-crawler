@@ -136,9 +136,9 @@ class ExtrairVeiculoCommand extends Command
      */
     public function seconds2human($seconds)
     {
-        $s = $seconds % 60;
-        $m = floor(($seconds % 3600) / 60);
-        $h = floor(($seconds % 86400) / 3600);
+        $s = intval($seconds % 60)	;
+        $m = intval(($seconds / 60) % 60);
+        $h = intval($seconds / 3600);
 
         return "{$h}h{$m}m{$s}s";
     }
