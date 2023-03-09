@@ -25,5 +25,5 @@ CREATE TABLE `veiculo` (
   `comb` varchar(10) NOT NULL,
   `valor` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `fipe_cod_anomod` (`fipe_cod`,`anomod`)
+  UNIQUE KEY `fipe_cod_anomod_comb_cod` (`fipe_cod`,`anomod`,`comb_cod`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

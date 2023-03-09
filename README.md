@@ -293,3 +293,43 @@ SELECT * FROM veiculo WHERE tipo = 1;
 ```sql
 SELECT DISTINCT comb_sigla, comb FROM veiculo ORDER BY comb_sigla, comb;
 ```
+
+
+```bash
+$ time ./fipecrawler veiculo:extrair 2023 1 Carro
+--------------------------------------------------------------------------------
+                                                                                
+  FIPE Crawler                                                                  
+  veiculo:extrair                                                               
+  Extrai tabela por ano, mês e tipo                                            
+                                                                                
+--------------------------------------------------------------------------------
+
+Recuperando tabelas para 01/2023...
+Encontrada tabela 01/2023 !
+
+Recuperando marcas para tabela id=[293] 01/2023, tipo=[1] Carro...
+Encontradas 92 marcas para tabela id=[293] 01/2023, tipo=[1] Carro !
+
+Recuperando modelos para 92 marcas -- tabela id=[293] 01/2023, tipo=[1] Carro...
+
+ 92/92 [============================] 6533 modelos extraídos
+Encontrados 6533 modelos para 92 marcas -- tabela id=[293] 01/2023, tipo=[1] Carro !
+
+Recuperando veiculos para para 6533 -- tabela id=[293] 01/2023, tipo=[1] Carro...
+ 6533/6533 [============================] 27251 veículos extraídos
+Extraídos 27251 veículos -- tabela id=[293] 01/2023, tipo=[1] Carro !
+
+--------------------------------------------------------------------------------
+                                                                                
+FIPE Crawler executado com sucesso em 14h2m9s, memória 8 megabytes             
+                                                                                
+--------------------------------------------------------------------------------
+FIPE Crawler executado com sucesso!
+
+
+real	69m57.767s
+user	4m42.890s
+sys	0m18.617s
+
+```
