@@ -2,7 +2,7 @@
     "require": {
         "symfony/dom-crawler": "~3.0@dev",
         "symfony/css-selector": "~3.0@dev",
-        "symfony/http-foundation": "~3.0@dev",
+        "symfony/http-foundation": "~5.4@dev",
         "symfony/stopwatch": "~3.0@dev",
         "symfony/console": "~3.0@dev"
     },
